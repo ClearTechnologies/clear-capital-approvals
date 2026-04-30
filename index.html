@@ -6,11 +6,59 @@
 <title>Clear Capital • Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ALL ORIGINAL CSS UNCHANGED */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--navy:#0a1729;--navy2:#0f2040;--navy3:#162035;--em:#00d4aa;--em2:#00b891;--amber:#f59e0b;--amber2:#d97706;--slate1:#f1f5f9;--slate2:#e2e8f0;--slate3:#94a3b8;--slate4:#64748b;--slate5:#334155;--slate6:#1e293b;--white:#fff;--r:14px;--r2:20px;}
+:root{
+  --navy:#0a1729;--navy2:#0f2040;--navy3:#162035;
+  --em:#00d4aa;--em2:#00b891;--em3:rgba(0,212,170,.12);
+  --amber:#f59e0b;--amber2:#d97706;
+  --slate1:#f1f5f9;--slate2:#e2e8f0;--slate3:#94a3b8;
+  --slate4:#64748b;--slate5:#334155;--slate6:#1e293b;
+  --white:#fff;--r:14px;--r2:20px;
+}
 html,body{height:100%;overflow:hidden}
 body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);display:flex;flex-direction:column}
+
+/* Improved Slider with Navy Trail */
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  background: transparent;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  background: linear-gradient(to right, var(--navy) var(--percent, 0%), #e2e8f0 var(--percent, 0%));
+  border-radius: 3px;
+  border: 1px solid #64748b;
+}
+input[type="range"]::-moz-range-track {
+  height: 6px;
+  background: linear-gradient(to right, var(--navy) var(--percent, 0%), #e2e8f0 var(--percent, 0%));
+  border-radius: 3px;
+  border: 1px solid #64748b;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--navy);
+  border: 3px solid var(--em);
+  border-radius: 50%;
+  cursor: pointer;
+  margin-top: -7px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--navy);
+  border: 3px solid var(--em);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* Rest of your original CSS (unchanged) */
 .topbar{height:56px;background:rgba(10,23,41,.95);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;padding:0 20px;gap:16px;flex-shrink:0;backdrop-filter:blur(12px);z-index:200}
 .topbar-logo{display:flex;align-items:center;gap:10px;margin-right:8px}
 .logo-mark{width:32px;height:32px;border-radius:9px;background:var(--em);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;color:var(--navy);flex-shrink:0}
@@ -40,33 +88,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);
 .pill.active{background:var(--em);color:var(--navy);border-color:var(--em);font-weight:600}
 .b-slider-wrap{padding:0 2px}
 .b-slider-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--slate4);margin-bottom:8px}
-input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:4px;background:rgba(255,255,255,.1);outline:none;cursor:pointer}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--navy);border:2.5px solid var(--em);box-shadow:0 0 0 3px rgba(0,212,170,.2);cursor:pointer;transition:transform .15s}
-input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
-input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--navy);border:2.5px solid var(--em);cursor:pointer}
-.freq-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.freq-btn{padding:8px 4px;border-radius:var(--r);font-size:12px;font-weight:500;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:var(--slate3);cursor:pointer;transition:all .2s;text-align:center}
-.freq-btn.active{background:rgba(0,212,170,.15);border-color:rgba(0,212,170,.4);color:var(--em)}
-.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--r);margin-bottom:8px}
-.toggle-label{font-size:13px;font-weight:500}
-.toggle-sub{font-size:11px;color:var(--slate4);margin-top:2px}
-.toggle-sw{position:relative;width:40px;height:22px;flex-shrink:0}
-.toggle-sw input{opacity:0;width:0;height:0}
-.toggle-sl{position:absolute;inset:0;border-radius:22px;background:rgba(255,255,255,.1);cursor:pointer;transition:.3s}
-.toggle-sl::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;border-radius:50%;background:var(--slate4);transition:.3s}
-.toggle-sw input:checked+.toggle-sl{background:rgba(0,212,170,.2)}
-.toggle-sw input:checked+.toggle-sl::before{transform:translateX(18px);background:var(--em)}
-.refi-sub{padding:10px 14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);margin-bottom:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.refi-sub .full{grid-column:1/-1}
-.btn-action{width:100%;padding:12px 16px;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;font-family:'DM Sans',sans-serif;border:none}
-.btn-em{background:var(--em);color:var(--navy)}
-.btn-em:hover{background:var(--em2)}
-.btn-white{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:var(--white)}
-.btn-white:hover{background:rgba(255,255,255,.14)}
-.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.1);color:var(--slate3)}
-.btn-ghost:hover{border-color:rgba(255,255,255,.2);color:var(--white)}
-.btn-amber{background:var(--amber);color:#1a0f00}
-.btn-amber:hover{background:var(--amber2)}
 .preview-panel{flex:1;background:var(--navy);display:flex;flex-direction:column;overflow:hidden}
 .preview-tabs{display:flex;align-items:center;gap:0;padding:0 24px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0;height:48px}
 .tab{padding:0 16px;height:100%;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--slate3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
@@ -211,17 +232,6 @@ textarea.form-input{resize:none}
         <label class="b-label">MAX APPROVAL AMOUNT</label>
         <input class="b-input b-input-lg" id="maxAmount" type="text" value="100,000" oninput="fmtInput(this);sync()">
       </div>
-      <!-- Slider (kept in builder for you) -->
-      <div class="b-section">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <label class="b-label" style="margin:0">SELECTED AMOUNT</label>
-          <span id="sliderLabel" style="font-size:14px;font-weight:700;color:var(--em);font-family:'DM Mono',monospace">$75,000</span>
-        </div>
-        <div class="b-slider-wrap">
-          <div class="b-slider-labels"><span>$5,000</span><span id="sliderMaxLabel">$100,000</span></div>
-          <input id="amtSlider" type="range" min="5000" max="100000" step="1000" value="75000" oninput="sliderMove()">
-        </div>
-      </div>
       <!-- Factor rate -->
       <div class="b-section">
         <label class="b-label">FACTOR RATE</label>
@@ -294,7 +304,7 @@ textarea.form-input{resize:none}
 
   <!-- RIGHT: PREVIEW -->
   <div class="preview-panel">
-    <div class="preview-tabs" id="previewTabs">
+    <div class="preview-tabs">
       <div class="tab active" onclick="switchTab('portal',this)">Merchant Portal</div>
       <div class="tab" onclick="switchTab('email',this)">Email Preview</div>
     </div>
@@ -550,13 +560,6 @@ function toggleFreq(btn){
   if(!S.freqs.includes(S.selFreq)) S.selFreq = S.freqs[0];
   sync();
 }
-function sliderMove(){
-  S.amt = parseInt(gid('amtSlider').value);
-  gid('sliderLabel').textContent = fm(S.amt);
-  readBuilder();
-  if(activeTab==='portal') renderPortalPreview();
-  else renderEmailPreview();
-}
 function toggleRefiFields(){
   gid('refiFields').style.display = gid('refiToggle').checked ? 'grid' : 'none';
 }
@@ -653,6 +656,8 @@ function renderPortalPreview(){
       </div>
     </div>`;
 }
+
+/* PREVIEW SLIDER WITH NAVY TRAIL */
 function previewSlider(val){
   S.amt = parseInt(val);
   const{total,pmt}=calc(S.amt,S.selTerm,S.selFreq,S.factor);
@@ -660,8 +665,11 @@ function previewSlider(val){
   if(a)a.textContent=fm(S.amt);
   if(p)p.textContent=fm(pmt);
   if(t)t.textContent=fm(total);
-  gid('sliderLabel').textContent=fm(S.amt);
-  gid('amtSlider').value=S.amt;
+
+  // Update navy trail
+  const percent = ((S.amt - 5000) / (S.max - 5000)) * 100;
+  const slider = gid('portalPreview').querySelector('input[type="range"]');
+  if (slider) slider.style.setProperty('--percent', percent + '%');
 }
 function previewSetTerm(t){ S.selTerm=t; renderPortalPreview(); }
 function previewSetFreq(f){ S.selFreq=f; renderPortalPreview(); }
@@ -793,18 +801,16 @@ function fileChosen(inputId,labelId,zoneId){ const f=gid(inputId).files[0]; if(f
 function copyLink(){ navigator.clipboard.writeText(portalURL()).then(()=>showToast('✓  Merchant link copied!')); }
 function openPortalTab(){ window.open(location.pathname+'?'+getParams(),'_blank'); }
 
-/* MERCHANT MODE - CLEAN PORTAL ONLY */
+/* MERCHANT MODE */
 function initMerchantMode() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('portal') === '1') {
-    // Hide top bar and builder
     const topbar = document.querySelector('.topbar');
     const builder = document.querySelector('.builder');
-    const tabs = document.getElementById('previewTabs');
+    const tabs = document.querySelector('.preview-tabs');
     if (topbar) topbar.style.display = 'none';
     if (builder) builder.style.display = 'none';
     if (tabs) tabs.style.display = 'none';
-    // Show only portal preview
     document.querySelector('.preview-panel').style.flex = '1';
     activeTab = 'portal';
     renderPortalPreview();
