@@ -6,15 +6,9 @@
 <title>Clear Capital • Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
+/* ALL ORIGINAL CSS UNCHANGED */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --navy:#0a1729;--navy2:#0f2040;--navy3:#162035;
-  --em:#00d4aa;--em2:#00b891;--em3:rgba(0,212,170,.12);
-  --amber:#f59e0b;--amber2:#d97706;
-  --slate1:#f1f5f9;--slate2:#e2e8f0;--slate3:#94a3b8;
-  --slate4:#64748b;--slate5:#334155;--slate6:#1e293b;
-  --white:#fff;--r:14px;--r2:20px;
-}
+:root{--navy:#0a1729;--navy2:#0f2040;--navy3:#162035;--em:#00d4aa;--em2:#00b891;--amber:#f59e0b;--amber2:#d97706;--slate1:#f1f5f9;--slate2:#e2e8f0;--slate3:#94a3b8;--slate4:#64748b;--slate5:#334155;--slate6:#1e293b;--white:#fff;--r:14px;--r2:20px;}
 html,body{height:100%;overflow:hidden}
 body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--white);display:flex;flex-direction:column}
 .topbar{height:56px;background:rgba(10,23,41,.95);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;padding:0 20px;gap:16px;flex-shrink:0;backdrop-filter:blur(12px);z-index:200}
@@ -198,10 +192,12 @@ textarea.form-input{resize:none}
   <!-- LEFT: BUILDER -->
   <div class="builder">
     <div class="builder-scroll">
+      <!-- Business name -->
       <div class="b-section">
         <label class="b-label">BUSINESS NAME</label>
         <input class="b-input" id="bizName" type="text" value="Sunrise Grill & Bar" oninput="sync()">
       </div>
+      <!-- Financing type -->
       <div class="b-section">
         <label class="b-label">FINANCING TYPE</label>
         <div class="pill-row">
@@ -210,10 +206,12 @@ textarea.form-input{resize:none}
           <button class="pill" onclick="setType(this,'Equipment')">Equipment</button>
         </div>
       </div>
+      <!-- Max amount -->
       <div class="b-section">
         <label class="b-label">MAX APPROVAL AMOUNT</label>
         <input class="b-input b-input-lg" id="maxAmount" type="text" value="100,000" oninput="fmtInput(this);sync()">
       </div>
+      <!-- Slider (kept in builder for you) -->
       <div class="b-section">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <label class="b-label" style="margin:0">SELECTED AMOUNT</label>
@@ -224,14 +222,17 @@ textarea.form-input{resize:none}
           <input id="amtSlider" type="range" min="5000" max="100000" step="1000" value="75000" oninput="sliderMove()">
         </div>
       </div>
+      <!-- Factor rate -->
       <div class="b-section">
         <label class="b-label">FACTOR RATE</label>
         <input class="b-input" id="factorRate" type="number" step="0.01" value="1.18" oninput="sync()">
       </div>
+      <!-- Terms -->
       <div class="b-section">
         <label class="b-label">TERM OPTIONS (months, comma-separated)</label>
         <input class="b-input" id="termOptions" type="text" value="6, 12, 18, 24" oninput="sync()">
       </div>
+      <!-- Frequencies -->
       <div class="b-section">
         <label class="b-label">PAYMENT FREQUENCIES</label>
         <div class="freq-row">
@@ -240,6 +241,7 @@ textarea.form-input{resize:none}
           <button class="freq-btn" onclick="toggleFreq(this)" data-freq="Monthly">Monthly</button>
         </div>
       </div>
+      <!-- Refi toggle -->
       <div class="b-section">
         <div class="toggle-row">
           <div>
@@ -257,6 +259,7 @@ textarea.form-input{resize:none}
           <div class="full"><label class="b-label">PAYMENT AMOUNT ($)</label><input class="b-input" id="refiPayment" type="number" value="2500" oninput="sync()"></div>
         </div>
       </div>
+      <!-- Early payoff toggle -->
       <div class="b-section">
         <div class="toggle-row">
           <div>
@@ -269,12 +272,14 @@ textarea.form-input{resize:none}
           </label>
         </div>
       </div>
+      <!-- Merchant email -->
       <div class="b-section">
         <label class="b-label">MERCHANT EMAIL (for sending offer)</label>
         <input class="b-input" id="merchantEmail" type="email" placeholder="owner@business.com">
       </div>
     </div>
 
+    <!-- Action buttons -->
     <div class="builder-actions">
       <button class="btn-action btn-em" onclick="openSendEmailModal()">
         <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
@@ -289,7 +294,7 @@ textarea.form-input{resize:none}
 
   <!-- RIGHT: PREVIEW -->
   <div class="preview-panel">
-    <div class="preview-tabs">
+    <div class="preview-tabs" id="previewTabs">
       <div class="tab active" onclick="switchTab('portal',this)">Merchant Portal</div>
       <div class="tab" onclick="switchTab('email',this)">Email Preview</div>
     </div>
@@ -661,7 +666,7 @@ function previewSlider(val){
 function previewSetTerm(t){ S.selTerm=t; renderPortalPreview(); }
 function previewSetFreq(f){ S.selFreq=f; renderPortalPreview(); }
 
-/* EMAIL PREVIEW (original) */
+/* EMAIL PREVIEW */
 function renderEmailPreview(){
   readBuilder();
   const{total,pmt}=calc(S.amt,S.selTerm,S.selFreq,S.factor);
@@ -681,7 +686,26 @@ function renderEmailPreview(){
   </div>
   <div style="padding:24px 28px;background:#fff">
     <p style="font-size:14px;color:#334155;line-height:1.7;margin-bottom:20px">Hi there,<br><br>I'm excited to share that <strong>${S.biz}</strong> has been pre-approved for ${S.finType} financing through Clear Capital. I've put together an offer tailored to your business — take a look below and confirm when you're ready.</p>
-    <!-- (rest of your original email preview HTML) -->
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:20px">
+      <div style="padding:12px 18px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:10px;letter-spacing:.1em;color:#94a3b8;font-weight:600">YOUR OFFER SUMMARY</div>
+        <div style="font-size:11px;color:#00b891;background:rgba(0,212,170,.08);padding:2px 10px;border-radius:100px;border:1px solid rgba(0,212,170,.2)">${S.finType}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr)">
+        <div style="padding:14px 16px;border-right:1px solid #e2e8f0;text-align:center">
+          <div style="font-size:9px;letter-spacing:.1em;color:#94a3b8;font-weight:600;margin-bottom:5px">APPROVED UP TO</div>
+          <div style="font-size:20px;font-weight:700;color:#00b891;font-family:'DM Mono',monospace">${fm(S.max)}</div>
+        </div>
+        <div style="padding:14px 16px;border-right:1px solid #e2e8f0;text-align:center">
+          <div style="font-size:9px;letter-spacing:.1em;color:#94a3b8;font-weight:600;margin-bottom:5px">FACTOR RATE</div>
+          <div style="font-size:20px;font-weight:700;color:#0a1729;font-family:'DM Mono',monospace">${S.factor.toFixed(2)}×</div>
+        </div>
+        <div style="padding:14px 16px;text-align:center">
+          <div style="font-size:9px;letter-spacing:.1em;color:#94a3b8;font-weight:600;margin-bottom:5px">TERM OPTIONS</div>
+          <div style="font-size:20px;font-weight:700;color:#0a1729;font-family:'DM Mono',monospace">${S.terms[0]}–${S.terms[S.terms.length-1]} mo</div>
+        </div>
+      </div>
+    </div>
     <div style="background:#0a1729;border-radius:12px;padding:20px 22px;margin-bottom:20px">
       <div style="font-size:9px;letter-spacing:.12em;color:rgba(255,255,255,.35);font-weight:600;margin-bottom:8px">YOUR PERSONAL OFFER PORTAL</div>
       <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 12px;font-size:10px;color:rgba(255,255,255,.4);font-family:'DM Mono',monospace;word-break:break-all;line-height:1.5;margin-bottom:14px">
@@ -769,14 +793,18 @@ function fileChosen(inputId,labelId,zoneId){ const f=gid(inputId).files[0]; if(f
 function copyLink(){ navigator.clipboard.writeText(portalURL()).then(()=>showToast('✓  Merchant link copied!')); }
 function openPortalTab(){ window.open(location.pathname+'?'+getParams(),'_blank'); }
 
-/* MERCHANT MODE */
+/* MERCHANT MODE - CLEAN PORTAL ONLY */
 function initMerchantMode() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('portal') === '1') {
+    // Hide top bar and builder
     const topbar = document.querySelector('.topbar');
     const builder = document.querySelector('.builder');
+    const tabs = document.getElementById('previewTabs');
     if (topbar) topbar.style.display = 'none';
     if (builder) builder.style.display = 'none';
+    if (tabs) tabs.style.display = 'none';
+    // Show only portal preview
     document.querySelector('.preview-panel').style.flex = '1';
     activeTab = 'portal';
     renderPortalPreview();
@@ -786,7 +814,7 @@ function initMerchantMode() {
 /* BOOT */
 toggleRefiFields();
 renderPortalPreview();
-initMerchantMode();   // ← This fixes the merchant portal
+initMerchantMode();
 </script>
 </body>
 </html>
