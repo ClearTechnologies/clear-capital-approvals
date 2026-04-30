@@ -21,7 +21,7 @@
             <div class="w-12 h-12 bg-[#0a1729] text-white rounded-3xl flex items-center justify-center text-4xl font-bold logo-font">C</div>
             <div class="text-4xl font-semibold logo-font">Clear Capital</div>
         </div>
-        <div class="text-emerald-600">Internal Deal Studio</div>
+        <div class="text-emerald-600 font-medium">Internal Deal Studio</div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -59,13 +59,11 @@
 
 <!-- MERCHANT VIEW -->
 <div id="merchant-only-view" class="hidden min-h-screen bg-slate-50 flex items-center justify-center p-6">
-    <div class="max-w-2xl w-full bg-white rounded-3xl p-10 shadow-xl" id="merchant-card"></div>
+    <div class="max-w-2xl w-full bg-white rounded-3xl p-10 shadow-2xl" id="merchant-card"></div>
 </div>
 
 <script>
-function isMerchantMode() {
-    return new URLSearchParams(window.location.search).has('merchant');
-}
+function isMerchantMode() { return new URLSearchParams(window.location.search).has('merchant'); }
 
 function generatePrivateLink() {
     const params = new URLSearchParams({
@@ -82,7 +80,7 @@ function generatePrivateLink() {
 
 function update() {
     if (isMerchantMode()) return;
-    document.getElementById('preview').innerHTML = `<div class="text-center py-32 text-slate-400">Live preview updates here...</div>`;
+    document.getElementById('preview').innerHTML = `<div class="text-center py-32 text-slate-400">Builder Preview</div>`;
 }
 
 function renderMerchantView() {
@@ -93,25 +91,31 @@ function renderMerchantView() {
     const maxTerm = parseInt(p.get('maxTerm')) || 12;
 
     const html = `
-        <div class="flex justify-between items-start mb-8">
+        <div class="flex justify-between items-center mb-8">
             <div class="flex items-center gap-3">
                 <div class="w-12 h-12 bg-[#0a1729] text-white rounded-3xl flex items-center justify-center text-4xl font-bold logo-font">C</div>
-                <div class="text-3xl font-semibold logo-font text-[#0a1729]">Clear Capital</div>
+                <div class="text-3xl font-semibold logo-font">Clear Capital</div>
             </div>
             <div class="bg-emerald-100 text-emerald-700 px-6 py-2 rounded-3xl font-semibold">PRE-APPROVED</div>
         </div>
 
-        <div class="text-5xl font-semibold text-[#0a1729]">${biz}</div>
+        <div class="text-4xl font-semibold">${biz}</div>
 
         <div class="mt-10">
-            <label class="block text-sm text-slate-500 mb-2">Funding Amount</label>
-            <div class="flex gap-4">
+            <label class="block text-sm text-slate-500 mb-2">Loan Amount</label>
+            <div class="flex gap-4 items-center">
                 <input id="amtInput" type="number" value="${Math.round(max*0.75)}" oninput="updateMerchantCalc()" 
                        class="flex-1 px-8 py-8 text-6xl font-bold border border-slate-200 rounded-3xl text-center">
             </div>
             <input type="range" id="amtSlider" min="5000" max="${max}" value="${Math.round(max*0.75)}" step="1" 
                    oninput="document.getElementById('amtInput').value = this.value; updateMerchantCalc()" 
                    class="w-full mt-6 accent-[#0a1729]">
+        </div>
+
+        <div class="mt-8">
+            <label class="block text-sm text-slate-500 mb-2">Term (Months)</label>
+            <input id="termInput" type="number" value="${maxTerm}" min="3" max="${maxTerm}" oninput="updateMerchantCalc()" 
+                   class="w-full px-6 py-5 text-xl border border-slate-200 rounded-2xl">
         </div>
 
         <div class="mt-12 grid grid-cols-3 gap-8 text-center" id="calcArea"></div>
@@ -129,22 +133,22 @@ function renderMerchantView() {
 function updateMerchantCalc() {
     const amt = parseInt(document.getElementById('amtInput').value) || 5000;
     const factor = parseFloat(new URLSearchParams(window.location.search).get('factor')) || 1.18;
-    const term = parseInt(new URLSearchParams(window.location.search).get('maxTerm')) || 12;
+    const term = parseInt(document.getElementById('termInput').value) || 12;
 
     const total = Math.round(amt * factor);
     const daily = Math.round(total / (term * 22));
 
     document.getElementById('calcArea').innerHTML = `
-        <div><div class="text-5xl font-semibold">$${daily}</div><div class="text-xs text-slate-500 mt-1">DAILY</div></div>
-        <div><div class="text-5xl font-semibold">$${total.toLocaleString()}</div><div class="text-xs text-slate-500 mt-1">TOTAL PAYBACK</div></div>
-        <div><div class="text-5xl font-semibold">${factor.toFixed(2)}×</div><div class="text-xs text-slate-500 mt-1">FACTOR RATE</div></div>
+        <div><div class="text-5xl font-semibold">$${daily}</div><div class="text-xs text-slate-500">DAILY</div></div>
+        <div><div class="text-5xl font-semibold">$${total.toLocaleString()}</div><div class="text-xs text-slate-500">TOTAL PAYBACK</div></div>
+        <div><div class="text-5xl font-semibold">${factor.toFixed(2)}×</div><div class="text-xs text-slate-500">FACTOR RATE</div></div>
     `;
 }
 
 function sendInterest() { alert("Thank you! A Clear Capital specialist will contact you shortly."); }
 function sendChangeRequest() { alert("Change request received."); }
 
-// Init
+// Initialize
 if (isMerchantMode()) {
     document.getElementById('builder-mode').classList.add('hidden');
     renderMerchantView();
