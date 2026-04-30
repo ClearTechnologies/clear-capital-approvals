@@ -764,7 +764,6 @@ function previewSlider(val){
   if(a)a.textContent=fm(S.amt);
   if(p)p.textContent=fm(pmt);
   if(t)t.textContent=fm(total);
-  // also update builder slider label
   gid('sliderLabel').textContent=fm(S.amt);
   gid('amtSlider').value=S.amt;
 }
@@ -857,9 +856,7 @@ function openSendEmailModal(){
   readBuilder();
   const{total,pmt}=calc(S.amt,S.selTerm,S.selFreq,S.factor);
   const link=portalURL();
-  // Pre-fill merchant email from builder field
   gid('se_email').value = gid('merchantEmail').value || '';
-  // Fill snapshot inside modal
   gid('emailOfferSnapshot').innerHTML=`
     <div class="offer-summary-header">
       <div class="offer-summary-title">CURRENT OFFER SNAPSHOT</div>
@@ -870,7 +867,6 @@ function openSendEmailModal(){
       <div class="offer-summary-cell"><div class="offer-summary-cell-label">AMOUNT</div><div class="offer-summary-cell-val green">${fm(S.amt)}</div></div>
       <div class="offer-summary-cell"><div class="offer-summary-cell-label">FACTOR</div><div class="offer-summary-cell-val">${S.factor.toFixed(2)}×</div></div>
     </div>`;
-  // Fill all hidden fields with current state
   gid('se_subject').value=`Offer Ready — ${S.biz} | Clear Capital`;
   gid('se_biz').value=S.biz;
   gid('se_type').value=S.finType;
@@ -902,7 +898,7 @@ function fillConfirmFields(){
 }
 
 /* ════════════════════════════════════
-   FORMSPREE AJAX HANDLER
+   FORMSPREE AJAX HANDLER (NOW FIXED FOR FORMSUBMIT.CO)
 ════════════════════════════════════ */
 async function fsSubmit(e, formId, wrapId, successId, errorId, btnId){
   e.preventDefault();
