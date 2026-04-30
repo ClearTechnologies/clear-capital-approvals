@@ -12,139 +12,102 @@
         .logo-font { font-family: 'Space Grotesk', sans-serif; }
     </style>
 </head>
-<body class="bg-slate-50">
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-6">
 
-<!-- BUILDER - ONLY YOU SEE THIS -->
-<div id="builder-mode">
-    <div class="max-w-7xl mx-auto p-8">
-        <div class="flex justify-between items-center mb-8">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-[#0a1729] text-white rounded-3xl flex items-center justify-center text-4xl font-bold logo-font">C</div>
-                <div class="text-4xl font-semibold logo-font">Clear Capital</div>
-            </div>
-            <div class="text-emerald-600 font-medium">Internal Deal Studio</div>
+<div class="max-w-2xl w-full bg-white rounded-3xl shadow-2xl p-10">
+
+    <div class="flex justify-between items-center mb-10">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-[#0a1729] text-white rounded-3xl flex items-center justify-center text-4xl font-bold logo-font">C</div>
+            <div class="text-3xl font-semibold logo-font">Clear Capital</div>
         </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div class="lg:col-span-4 bg-white rounded-3xl p-8 space-y-8">
-                <h1 class="text-3xl font-semibold logo-font">Deal Builder</h1>
-                
-                <input id="bizName" value="Sunrise Grill & Bar" oninput="update()" class="w-full px-6 py-5 text-xl border border-slate-200 rounded-2xl">
-
-                <div class="grid grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm text-slate-500 mb-2">Max Approval</label>
-                        <input id="maxAmt" type="number" value="100000" oninput="update()" class="w-full px-6 py-5 text-xl border border-slate-200 rounded-2xl">
-                    </div>
-                    <div>
-                        <label class="block text-sm text-slate-500 mb-2">Factor Rate</label>
-                        <input id="factorRate" type="number" value="1.18" step="0.01" oninput="update()" class="w-full px-6 py-5 text-xl border border-slate-200 rounded-2xl">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm text-slate-500 mb-2">Max Term (months)</label>
-                    <input id="maxTerm" type="number" value="12" oninput="update()" class="w-full px-6 py-5 text-xl border border-slate-200 rounded-2xl">
-                </div>
-
-                <button onclick="generatePrivateLink()" class="w-full py-7 bg-[#0a1729] text-white font-semibold text-xl rounded-3xl">
-                    Generate Private Merchant Link
-                </button>
-            </div>
-
-            <div class="lg:col-span-8">
-                <div id="preview" class="bg-white rounded-3xl p-10 text-center text-slate-400 py-32">Live Preview</div>
-            </div>
-        </div>
+        <div class="bg-emerald-100 text-emerald-700 px-6 py-2 rounded-3xl font-semibold">PRE-APPROVED</div>
     </div>
-</div>
 
-<!-- MERCHANT VIEW - WHAT THE MERCHANT SEES -->
-<div id="merchant-only-view" class="hidden min-h-screen bg-slate-50 flex items-center justify-center p-6">
-    <div class="max-w-2xl w-full bg-white rounded-3xl p-10 shadow-2xl" id="merchant-card"></div>
+    <div id="bizNameDisplay" class="text-4xl font-semibold text-[#0a1729]">Sunrise Grill & Bar</div>
+
+    <!-- Funding Amount -->
+    <div class="mt-10">
+        <label class="block text-sm text-slate-500 mb-3">Funding Amount</label>
+        <input id="amtInput" type="number" value="75000" 
+               oninput="updateCalc()" 
+               onblur="formatAmount(this)"
+               class="w-full px-8 py-8 text-6xl font-bold border border-slate-200 rounded-3xl text-center">
+        <input type="range" id="amtSlider" min="5000" max="100000" value="75000" step="1" 
+               oninput="document.getElementById('amtInput').value = this.value; updateCalc()" 
+               class="w-full mt-6 accent-[#0a1729]">
+    </div>
+
+    <!-- Main Calculations -->
+    <div class="mt-12 grid grid-cols-3 gap-8 text-center" id="mainCalc"></div>
+
+    <!-- Early Payoff -->
+    <div class="mt-12 bg-emerald-50 border border-emerald-100 rounded-3xl p-8">
+        <div class="font-semibold text-emerald-800 mb-6">Early Payoff Options</div>
+        <div class="grid grid-cols-3 gap-6 text-center" id="earlyPayoff"></div>
+    </div>
+
+    <div class="mt-16 flex gap-4">
+        <button onclick="sendInterest()" class="flex-1 py-8 bg-[#0a1729] text-white font-semibold text-2xl rounded-3xl">I'm Interested →</button>
+        <button onclick="sendChangeRequest()" class="flex-1 py-8 border-2 border-slate-300 font-semibold text-2xl rounded-3xl">Request Change</button>
+    </div>
+
 </div>
 
 <script>
-function isMerchantMode() {
-    return window.location.search.includes('merchant=true');
+function fmt(n) {
+    return '$' + Math.round(n).toLocaleString('en-US');
 }
 
-function generatePrivateLink() {
-    const params = new URLSearchParams({
-        merchant: 'true',
-        biz: document.getElementById('bizName').value || 'Business',
-        max: document.getElementById('maxAmt').value,
-        factor: document.getElementById('factorRate').value,
-        maxTerm: document.getElementById('maxTerm').value
-    });
-    const link = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
-    navigator.clipboard.writeText(link);
-    alert('✅ Private Merchant Link Copied!\n\nOpen this link in a new tab to see what the merchant sees.');
+function formatAmount(input) {
+    const val = parseInt(input.value) || 5000;
+    const max = parseInt(new URLSearchParams(window.location.search).get('max')) || 100000;
+    let cleanVal = Math.min(Math.max(val, 5000), max);
+    input.value = cleanVal;
+    updateCalc();
 }
 
-function update() {
-    if (isMerchantMode()) return;
-    document.getElementById('preview').innerHTML = `<div class="text-center text-slate-400 py-32">Builder Preview - Updates as you type</div>`;
-}
+function updateCalc() {
+    let amt = parseInt(document.getElementById('amtInput').value) || 5000;
+    const factor = 1.18;
+    const term = 12;
 
-function renderMerchantView() {
-    const p = new URLSearchParams(window.location.search);
-    const biz = p.get('biz') || "Business";
-    const max = parseInt(p.get('max')) || 100000;
-    const factor = parseFloat(p.get('factor')) || 1.18;
-    const maxTerm = parseInt(p.get('maxTerm')) || 12;
-
-    const amt = Math.round(max * 0.75);
     const total = Math.round(amt * factor);
-    const daily = Math.round(total / (maxTerm * 22));
+    const daily = Math.round(total / (term * 22));
 
-    document.getElementById('merchant-card').innerHTML = `
-        <div class="flex justify-between items-start mb-8">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-[#0a1729] text-white rounded-3xl flex items-center justify-center text-4xl font-bold logo-font">C</div>
-                <div class="text-3xl font-semibold logo-font">Clear Capital</div>
-            </div>
-            <div class="bg-emerald-100 text-emerald-700 px-6 py-2 rounded-3xl font-semibold">PRE-APPROVED</div>
+    document.getElementById('mainCalc').innerHTML = `
+        <div><div class="text-5xl font-semibold">${fmt(daily)}</div><div class="text-xs text-slate-500">DAILY PAYMENT</div></div>
+        <div><div class="text-5xl font-semibold">${fmt(total)}</div><div class="text-xs text-slate-500">TOTAL PAYBACK</div></div>
+        <div><div class="text-5xl font-semibold">${factor.toFixed(2)}×</div><div class="text-xs text-slate-500">FACTOR RATE</div></div>
+    `;
+
+    const remaining = total - amt;
+    const savings = Math.round(remaining * 0.5);
+
+    document.getElementById('earlyPayoff').innerHTML = `
+        <div class="bg-white rounded-2xl p-5">
+            <div class="text-emerald-600 font-semibold">30 Days</div>
+            <div class="text-3xl font-bold text-emerald-700">${fmt(total - savings)}</div>
+            <div class="text-xs text-slate-500">1.03 Factor</div>
         </div>
-
-        <div class="text-5xl font-semibold">${biz}</div>
-
-        <div class="mt-10">
-            <label class="block text-sm text-slate-500 mb-2">Funding Amount</label>
-            <input id="amtInput" type="number" value="${amt}" oninput="updateMerchantCalc()" 
-                   class="w-full px-8 py-8 text-6xl font-bold border border-slate-200 rounded-3xl text-center">
-            <input type="range" id="amtSlider" min="5000" max="${max}" value="${amt}" step="1" 
-                   oninput="document.getElementById('amtInput').value = this.value; updateMerchantCalc()" 
-                   class="w-full mt-6 accent-[#0a1729]">
+        <div class="bg-white rounded-2xl p-5">
+            <div class="text-emerald-600 font-semibold">60 Days</div>
+            <div class="text-3xl font-bold text-emerald-700">${fmt(total - Math.round(remaining * 0.3))}</div>
+            <div class="text-xs text-slate-500">1.07 Factor</div>
         </div>
-
-        <div class="mt-12 grid grid-cols-3 gap-8 text-center">
-            <div><div class="text-5xl font-semibold">$${daily}</div><div class="text-xs text-slate-500">DAILY</div></div>
-            <div><div class="text-5xl font-semibold">$${total.toLocaleString()}</div><div class="text-xs text-slate-500">TOTAL PAYBACK</div></div>
-            <div><div class="text-5xl font-semibold">${factor.toFixed(2)}×</div><div class="text-xs text-slate-500">FACTOR RATE</div></div>
-        </div>
-
-        <div class="mt-16 flex gap-4">
-            <button onclick="sendInterest()" class="flex-1 py-8 bg-[#0a1729] text-white font-semibold text-2xl rounded-3xl">I'm Interested →</button>
-            <button onclick="sendChangeRequest()" class="flex-1 py-8 border-2 border-slate-300 font-semibold text-2xl rounded-3xl">Request Change</button>
+        <div class="bg-white rounded-2xl p-5">
+            <div class="text-emerald-600 font-semibold">90 Days</div>
+            <div class="text-3xl font-bold text-emerald-700">${fmt(total - Math.round(remaining * 0.1))}</div>
+            <div class="text-xs text-slate-500">1.10 Factor</div>
         </div>
     `;
-}
-
-function updateMerchantCalc() {
-    // Live calculation can be expanded later
 }
 
 function sendInterest() { alert("Thank you! A Clear Capital specialist will contact you shortly."); }
 function sendChangeRequest() { alert("Change request received."); }
 
-// Initialize - THIS IS THE KEY FIX
-if (isMerchantMode()) {
-    document.getElementById('builder-mode').classList.add('hidden');
-    renderMerchantView();
-} else {
-    update();
-}
+// Initial load
+updateCalc();
 </script>
 </body>
 </html>
