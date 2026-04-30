@@ -1,344 +1,797 @@
-html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Clear Capital • Builder + Merchant Portal</title>
-
+<title>Clear Capital • Offer Builder</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-
 <style>
-:root{
-    --navy:#0a1729;
-    --emerald:#00d4aa;
+:root { --navy:#0a1729; --emerald:#00d4aa; }
+body { font-family: Inter, system-ui, sans-serif; }
+.logo-font { font-family: 'Space Grotesk', sans-serif; }
+.preview-frame { box-shadow: 0 25px 50px -12px rgb(0 0 0/.25); }
+
+/* ── Custom range slider ── */
+input[type=range] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 6px; border-radius: 6px;
+  background: #1e293b; outline: none; cursor: pointer;
 }
-body{
-    font-family:Inter,system-ui,sans-serif;
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--emerald); border: 3px solid #0a1729;
+  box-shadow: 0 0 0 2px var(--emerald);
+  cursor: pointer; transition: transform .15s;
 }
-.logo-font{
-    font-family:'Space Grotesk',sans-serif;
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+input[type=range]::-moz-range-thumb {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--emerald); border: 3px solid #0a1729;
+  cursor: pointer;
 }
-.preview-frame{
-    box-shadow:0 25px 50px -12px rgb(0 0 0 / .25);
+
+/* ── Toggle switch ── */
+.toggle-wrap { display:flex; align-items:center; gap:12px; }
+.toggle-switch { position:relative; width:48px; height:26px; }
+.toggle-switch input { opacity:0; width:0; height:0; }
+.toggle-slider {
+  position:absolute; inset:0; border-radius:26px;
+  background:#1e293b; transition:.3s; cursor:pointer;
 }
+.toggle-slider:before {
+  content:''; position:absolute; width:18px; height:18px;
+  left:4px; top:4px; border-radius:50%; background:#64748b;
+  transition:.3s;
+}
+.toggle-switch input:checked + .toggle-slider { background:rgba(0,212,170,.2); }
+.toggle-switch input:checked + .toggle-slider:before {
+  transform:translateX(22px); background:var(--emerald);
+}
+
+/* ── Overlay modal ── */
+.modal-bg {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,.7); z-index:1000;
+  align-items:center; justify-content:center;
+}
+.modal-bg.open { display:flex; }
+
+/* ── Toast ── */
+#toast {
+  position:fixed; bottom:28px; right:28px; z-index:2000;
+  background:#00d4aa; color:#0a1729; font-weight:700;
+  padding:14px 24px; border-radius:14px;
+  transform:translateY(80px); opacity:0;
+  transition:all .35s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:none;
+}
+#toast.show { transform:translateY(0); opacity:1; }
+
+/* ── Pill tabs ── */
+.pill-tab { transition:all .2s; }
+.pill-tab.active { background:#00d4aa !important; color:#0a1729 !important; }
 </style>
 </head>
 
 <body class="bg-slate-950 text-white min-h-screen">
 
-<div class="flex h-screen">
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  VIEW A: BUILDER (shown when no ?portal param)         -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="builderView" class="flex h-screen">
 
-    <!-- ========================= -->
-    <!-- BUILDER PANEL -->
-    <!-- ========================= -->
-    <div class="w-5/12 bg-slate-900 border-r border-slate-800 overflow-auto">
-        <div class="p-8">
+  <!-- LEFT PANEL: Controls -->
+  <div class="w-5/12 min-w-[380px] bg-slate-900 border-r border-slate-800 overflow-auto">
+    <div class="p-8">
 
-            <!-- LOGO -->
-            <div class="flex items-center gap-3 mb-10">
-                <div class="w-10 h-10 bg-white text-[#0a1729] rounded-2xl flex items-center justify-center text-3xl font-bold logo-font">C</div>
-                <div>
-                    <div class="text-2xl font-semibold logo-font">Clear Capital</div>
-                    <div class="text-xs text-emerald-400">Offer Builder</div>
-                </div>
-            </div>
-
-            <h1 class="text-3xl font-semibold mb-8">Create Merchant Offer</h1>
-
-            <div class="space-y-8">
-
-                <!-- Business Name -->
-                <div>
-                    <label class="block text-sm text-slate-400 mb-2">Business Name</label>
-                    <input
-                        id="bizName"
-                        type="text"
-                        value="Sunrise Grill & Bar"
-                        oninput="updatePreview()"
-                        class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-emerald-500">
-                </div>
-
-                <!-- Max Amount -->
-                <div>
-                    <label class="block text-sm text-slate-400 mb-2">Maximum Approval Amount</label>
-                    <input
-                        id="maxAmount"
-                        type="text"
-                        value="100,000"
-                        oninput="formatAsYouType(this); updatePreview()"
-                        class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-6 py-4 text-2xl font-semibold focus:outline-none focus:border-emerald-500">
-                </div>
-
-                <!-- Factor -->
-                <div>
-                    <label class="block text-sm text-slate-400 mb-2">Factor Rate</label>
-                    <input
-                        id="factorRate"
-                        type="number"
-                        step="0.01"
-                        value="1.18"
-                        oninput="updatePreview()"
-                        class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-emerald-500">
-                </div>
-
-                <!-- Term -->
-                <div>
-                    <label class="block text-sm text-slate-400 mb-2">Maximum Term (Months)</label>
-                    <input
-                        id="maxTerm"
-                        type="number"
-                        value="12"
-                        oninput="updatePreview()"
-                        class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-emerald-500">
-                </div>
-
-                <!-- Frequencies -->
-                <div>
-                    <label class="block text-sm text-slate-400 mb-3">Allowed Frequencies</label>
-
-                    <div class="grid grid-cols-3 gap-3">
-                        <button onclick="toggleFreq(this)" data-freq="daily"
-                            class="freq-btn active bg-emerald-600 py-4 rounded-2xl font-medium">
-                            Daily
-                        </button>
-
-                        <button onclick="toggleFreq(this)" data-freq="weekly"
-                            class="freq-btn bg-slate-800 py-4 rounded-2xl font-medium">
-                            Weekly
-                        </button>
-
-                        <button onclick="toggleFreq(this)" data-freq="monthly"
-                            class="freq-btn bg-slate-800 py-4 rounded-2xl font-medium">
-                            Monthly
-                        </button>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- BUTTONS -->
-            <div class="mt-12 space-y-4">
-
-                <button onclick="generateLink()"
-                    class="w-full bg-emerald-500 hover:bg-emerald-600 transition text-black font-semibold text-xl py-6 rounded-3xl">
-                    Generate Merchant Link
-                </button>
-
-                <button onclick="openPortal()"
-                    class="w-full bg-white text-slate-900 font-semibold text-xl py-6 rounded-3xl">
-                    Open Merchant Portal
-                </button>
-
-            </div>
-
+      <!-- Logo -->
+      <div class="flex items-center gap-3 mb-10">
+        <div class="w-10 h-10 bg-white text-[#0a1729] rounded-2xl flex items-center justify-center text-2xl font-bold logo-font">C</div>
+        <div>
+          <div class="text-xl font-semibold logo-font">Clear Capital</div>
+          <div class="text-xs text-emerald-400 tracking-wide">OFFER BUILDER</div>
         </div>
+      </div>
+
+      <h1 class="text-2xl font-semibold mb-6">Create Merchant Offer</h1>
+
+      <div class="space-y-6">
+
+        <!-- Business name -->
+        <div>
+          <label class="block text-sm text-slate-400 mb-2">Business Name</label>
+          <input id="bizName" type="text" value="Sunrise Grill & Bar" oninput="updatePreview()"
+            class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-5 py-3.5 text-base focus:outline-none focus:border-emerald-500">
+        </div>
+
+        <!-- Financing type -->
+        <div>
+          <label class="block text-sm text-slate-400 mb-2">Financing Type</label>
+          <div class="flex gap-2">
+            <button onclick="setType(this,'Business Loan')" data-type="Business Loan"
+              class="pill-tab active flex-1 py-3 rounded-2xl text-sm font-medium bg-slate-800 text-slate-300">
+              Business Loan
+            </button>
+            <button onclick="setType(this,'Revenue-Based')" data-type="Revenue-Based"
+              class="pill-tab flex-1 py-3 rounded-2xl text-sm font-medium bg-slate-800 text-slate-300">
+              Revenue-Based
+            </button>
+            <button onclick="setType(this,'Equipment')" data-type="Equipment"
+              class="pill-tab flex-1 py-3 rounded-2xl text-sm font-medium bg-slate-800 text-slate-300">
+              Equipment
+            </button>
+          </div>
+        </div>
+
+        <!-- Max amount -->
+        <div>
+          <label class="block text-sm text-slate-400 mb-2">Max Approval Amount</label>
+          <input id="maxAmount" type="text" value="100,000" oninput="fmtInput(this);updatePreview()"
+            class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-5 py-3.5 text-2xl font-semibold focus:outline-none focus:border-emerald-500">
+        </div>
+
+        <!-- Slider -->
+        <div>
+          <div class="flex justify-between text-sm text-slate-400 mb-2">
+            <label>Selected Funding Amount</label>
+            <span id="sliderLabel" class="text-emerald-400 font-semibold">$75,000</span>
+          </div>
+          <input id="amtSlider" type="range" min="5000" max="100000" step="1000" value="75000" oninput="sliderMove()">
+          <div class="flex justify-between text-xs text-slate-500 mt-1">
+            <span>$5,000</span><span id="sliderMaxLabel">$100,000</span>
+          </div>
+        </div>
+
+        <!-- Factor Rate -->
+        <div>
+          <label class="block text-sm text-slate-400 mb-2">Factor Rate</label>
+          <input id="factorRate" type="number" step="0.01" value="1.18" oninput="updatePreview()"
+            class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-5 py-3.5 text-lg focus:outline-none focus:border-emerald-500">
+        </div>
+
+        <!-- Term -->
+        <div>
+          <label class="block text-sm text-slate-400 mb-2">Term Options (months)</label>
+          <input id="termOptions" type="text" value="6, 12, 18, 24" oninput="updatePreview()"
+            class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-5 py-3.5 text-base focus:outline-none focus:border-emerald-500">
+        </div>
+
+        <!-- Frequencies -->
+        <div>
+          <label class="block text-sm text-slate-400 mb-3">Payment Frequencies</label>
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="toggleFreq(this)" data-freq="Daily"
+              class="freq-btn active bg-emerald-600 py-3.5 rounded-2xl text-sm font-medium transition-all">Daily</button>
+            <button onclick="toggleFreq(this)" data-freq="Weekly"
+              class="freq-btn bg-slate-800 py-3.5 rounded-2xl text-sm font-medium transition-all">Weekly</button>
+            <button onclick="toggleFreq(this)" data-freq="Monthly"
+              class="freq-btn bg-slate-800 py-3.5 rounded-2xl text-sm font-medium transition-all">Monthly</button>
+          </div>
+        </div>
+
+        <!-- Refi Toggle -->
+        <div class="bg-slate-800 rounded-2xl p-4 space-y-4">
+          <div class="toggle-wrap justify-between">
+            <span class="text-sm font-medium">Refi / Payoff Section</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="refiToggle" checked onchange="updatePreview()">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div id="refiFields" class="space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="text-xs text-slate-400 mb-1 block">Existing Balance ($)</label>
+                <input id="refiBalance" type="number" value="35000" oninput="updatePreview()"
+                  class="w-full bg-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500">
+              </div>
+              <div>
+                <label class="text-xs text-slate-400 mb-1 block">Remaining Payments</label>
+                <input id="refiRemaining" type="number" value="18" oninput="updatePreview()"
+                  class="w-full bg-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500">
+              </div>
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 mb-1 block">Payment Amount ($)</label>
+              <input id="refiPayment" type="number" value="2500" oninput="updatePreview()"
+                class="w-full bg-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500">
+            </div>
+          </div>
+        </div>
+
+        <!-- Early Payoff Toggle -->
+        <div class="bg-slate-800 rounded-2xl p-4">
+          <div class="toggle-wrap justify-between">
+            <span class="text-sm font-medium">Early Payoff Discounts</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="earlyToggle" checked onchange="updatePreview()">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <p class="text-xs text-slate-500 mt-2">Shows 30/60/90-day early payoff savings automatically.</p>
+        </div>
+
+      </div><!-- end space-y-6 -->
+
+      <!-- ACTION BUTTONS -->
+      <div class="mt-8 space-y-3">
+
+        <button onclick="generateLink()"
+          class="w-full bg-emerald-500 hover:bg-emerald-400 transition text-slate-900 font-semibold text-base py-4 rounded-2xl flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101"/><path d="M10.172 13.828a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+          Copy Merchant Link
+        </button>
+
+        <button onclick="openPortal()"
+          class="w-full bg-white text-slate-900 hover:bg-slate-100 transition font-semibold text-base py-4 rounded-2xl flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          Open Merchant Portal
+        </button>
+
+        <button onclick="exportPDF()"
+          class="w-full bg-slate-800 hover:bg-slate-700 transition border border-slate-700 font-semibold text-base py-4 rounded-2xl flex items-center justify-center gap-2">
+          <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+          Download PDF Offer Letter
+        </button>
+
+        <button onclick="draftEmail()"
+          class="w-full bg-slate-800 hover:bg-slate-700 transition border border-slate-700 font-semibold text-base py-4 rounded-2xl flex items-center justify-center gap-2">
+          <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          Draft Send Email
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL: Live preview -->
+  <div class="flex-1 bg-slate-950 p-8 overflow-auto flex items-start justify-center pt-16">
+    <div class="w-full max-w-[440px]">
+      <div class="text-center text-slate-500 text-xs mb-4 tracking-widest">LIVE MERCHANT PREVIEW</div>
+      <div id="previewContainer" class="preview-frame bg-white rounded-3xl overflow-hidden text-slate-900"></div>
+    </div>
+  </div>
+
+</div><!-- end builderView -->
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  VIEW B: MERCHANT PORTAL                               -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="portalView" class="hidden min-h-screen bg-slate-50 text-slate-900">
+
+  <!-- Portal header -->
+  <div class="bg-[#0a1729] px-6 py-5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 bg-white text-[#0a1729] rounded-xl flex items-center justify-center text-xl font-bold logo-font">C</div>
+      <div>
+        <div class="text-white font-semibold logo-font text-lg">Clear Capital</div>
+        <div class="text-emerald-400 text-xs tracking-widest">FINANCING SOLUTIONS</div>
+      </div>
+    </div>
+    <div class="bg-emerald-500 text-slate-900 text-xs font-bold px-4 py-1.5 rounded-full tracking-wide">PRE-APPROVED</div>
+  </div>
+
+  <div class="max-w-xl mx-auto px-5 py-10 space-y-6" id="portalContent">
+    <!-- Rendered by JS -->
+  </div>
+
+</div><!-- end portalView -->
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  MODALS                                                -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<!-- Upload / Confirm modal -->
+<div id="uploadModal" class="modal-bg">
+  <div class="bg-slate-900 rounded-3xl p-8 w-full max-w-md mx-4 border border-slate-800">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center">
+        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <div>
+        <div class="font-semibold text-lg">Confirm Your Offer</div>
+        <div class="text-slate-400 text-sm">Upload documents to proceed</div>
+      </div>
     </div>
 
-    <!-- ========================= -->
-    <!-- LIVE PREVIEW -->
-    <!-- ========================= -->
-    <div class="flex-1 bg-slate-50 p-8 overflow-auto flex items-center justify-center">
-        <div class="w-full max-w-[440px]">
-            <div class="text-center text-slate-400 text-sm mb-4">
-                LIVE PREVIEW
-            </div>
-
-            <div id="previewContainer" class="preview-frame bg-white rounded-3xl overflow-hidden"></div>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm text-slate-400 mb-2">Driver's License <span class="text-emerald-400">*</span></label>
+        <div class="border-2 border-dashed border-slate-700 rounded-2xl p-5 text-center cursor-pointer hover:border-emerald-500 transition" onclick="document.getElementById('dlFile').click()">
+          <svg class="w-8 h-8 text-slate-500 mx-auto mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <div id="dlLabel" class="text-sm text-slate-400">Click to upload Driver's License</div>
+          <div class="text-xs text-slate-600 mt-1">JPG, PNG, or PDF</div>
         </div>
+        <input id="dlFile" type="file" accept="image/*,.pdf" class="hidden" onchange="fileChosen('dlLabel',this)">
+      </div>
+
+      <div>
+        <label class="block text-sm text-slate-400 mb-2">Voided Check <span class="text-emerald-400">*</span></label>
+        <div class="border-2 border-dashed border-slate-700 rounded-2xl p-5 text-center cursor-pointer hover:border-emerald-500 transition" onclick="document.getElementById('checkFile').click()">
+          <svg class="w-8 h-8 text-slate-500 mx-auto mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 7H6a2 2 0 00-2 2v9a2 2 0 002 2h9a2 2 0 002-2v-3M9 7V4a1 1 0 011-1h5l4 4v8a1 1 0 01-1 1h-3M9 7h5l3 3"/></svg>
+          <div id="checkLabel" class="text-sm text-slate-400">Click to upload Voided Check</div>
+          <div class="text-xs text-slate-600 mt-1">JPG, PNG, or PDF</div>
+        </div>
+        <input id="checkFile" type="file" accept="image/*,.pdf" class="hidden" onchange="fileChosen('checkLabel',this)">
+      </div>
+
+      <div>
+        <label class="block text-sm text-slate-400 mb-2">Your Full Name</label>
+        <input id="merchantName" type="text" placeholder="Jane Smith"
+          class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500">
+      </div>
+
+      <div>
+        <label class="block text-sm text-slate-400 mb-2">Phone Number</label>
+        <input id="merchantPhone" type="text" placeholder="(555) 000-0000"
+          class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500">
+      </div>
+
+      <div class="bg-slate-800 rounded-xl p-3 text-xs text-slate-400">
+        By confirming, you authorize Clear Capital to review your documents. Documents will be sent securely to <span class="text-emerald-400">mark@clearcapfund.com</span>.
+      </div>
     </div>
 
+    <div class="flex gap-3 mt-6">
+      <button onclick="closeModal('uploadModal')" class="flex-1 bg-slate-800 hover:bg-slate-700 py-3.5 rounded-2xl text-sm font-medium transition">Cancel</button>
+      <button onclick="submitConfirmation()" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-900 py-3.5 rounded-2xl text-sm font-semibold transition">Confirm Offer</button>
+    </div>
+  </div>
 </div>
 
+<!-- Request Changes modal -->
+<div id="changesModal" class="modal-bg">
+  <div class="bg-slate-900 rounded-3xl p-8 w-full max-w-md mx-4 border border-slate-800">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center">
+        <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+      </div>
+      <div>
+        <div class="font-semibold text-lg">Request Changes</div>
+        <div class="text-slate-400 text-sm">Tell us what you'd like adjusted</div>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm text-slate-400 mb-2">What would you like changed?</label>
+        <div class="grid grid-cols-2 gap-2 mb-3">
+          <button onclick="toggleChangeTag(this)" class="change-tag bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-left hover:border-amber-400 transition">💰 Funding Amount</button>
+          <button onclick="toggleChangeTag(this)" class="change-tag bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-left hover:border-amber-400 transition">📅 Term Length</button>
+          <button onclick="toggleChangeTag(this)" class="change-tag bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-left hover:border-amber-400 transition">📆 Payment Frequency</button>
+          <button onclick="toggleChangeTag(this)" class="change-tag bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-left hover:border-amber-400 transition">📊 Factor Rate</button>
+          <button onclick="toggleChangeTag(this)" class="change-tag bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-left hover:border-amber-400 transition">🔄 Refi Terms</button>
+          <button onclick="toggleChangeTag(this)" class="change-tag bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-left hover:border-amber-400 transition">⚡ Early Payoff</button>
+        </div>
+        <textarea id="changeNotes" rows="4" placeholder="Describe what you'd like changed or any questions you have..."
+          class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500 resize-none"></textarea>
+      </div>
+      <div>
+        <label class="block text-sm text-slate-400 mb-2">Your Name</label>
+        <input id="changeName" type="text" placeholder="Jane Smith"
+          class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500">
+      </div>
+      <div>
+        <label class="block text-sm text-slate-400 mb-2">Phone Number</label>
+        <input id="changePhone" type="text" placeholder="(555) 000-0000"
+          class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500">
+      </div>
+      <div class="bg-slate-800 rounded-xl p-3 text-xs text-slate-400">
+        Your request will be sent to <span class="text-emerald-400">mark@clearcapfund.com</span>. We'll respond within 1 business day.
+      </div>
+    </div>
+
+    <div class="flex gap-3 mt-6">
+      <button onclick="closeModal('changesModal')" class="flex-1 bg-slate-800 hover:bg-slate-700 py-3.5 rounded-2xl text-sm font-medium transition">Cancel</button>
+      <button onclick="submitChanges()" class="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-900 py-3.5 rounded-2xl text-sm font-semibold transition">Send Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast">✓ &nbsp;Copied to clipboard!</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  SCRIPTS                                               -->
+<!-- ═══════════════════════════════════════════════════════ -->
 <script>
-/* =========================
-   HELPERS
-========================= */
 
-function num(v){
-    return parseFloat(String(v).replace(/,/g,'')) || 0;
+/* ─── State ──────────────────────────────────────────────── */
+let state = {
+  biz:'Sunrise Grill & Bar', finType:'Business Loan',
+  max:100000, amt:75000, factor:1.18, terms:[6,12,18,24],
+  freqs:['Daily'], selTerm:12, selFreq:'Daily',
+  refiOn:true, refiBalance:35000, refiRemaining:18, refiPayment:2500,
+  earlyOn:true
+};
+let changeTags = new Set();
+
+/* ─── Helpers ────────────────────────────────────────────── */
+function num(v){ return parseFloat(String(v).replace(/,/g,''))||0; }
+function fmt(n){ return '$'+Math.round(n).toLocaleString('en-US'); }
+function fmtInput(el){ let r=el.value.replace(/\D/g,''); el.value=r?parseInt(r).toLocaleString('en-US'):''; }
+function calcPmt(amt,term,freq,factor){
+  const total=amt*factor;
+  const p=freq==='Daily'?term*22:freq==='Weekly'?Math.round(term*4.33):term;
+  return{total,payment:total/p,periods:Math.round(p)};
 }
-
-function money(n){
-    return '$' + Math.round(n).toLocaleString('en-US');
+function showToast(msg='✓  Done!'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
 }
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 
-function formatAsYouType(input){
-    let raw = input.value.replace(/[^0-9]/g,'');
-    if(raw){
-        input.value = parseInt(raw).toLocaleString('en-US');
-    }else{
-        input.value = '';
-    }
+/* ─── Builder controls ───────────────────────────────────── */
+function setType(btn,type){
+  state.finType=type;
+  document.querySelectorAll('.pill-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  updatePreview();
 }
-
-function getSelectedFrequencies(){
-    return [...document.querySelectorAll('.freq-btn.active')]
-        .map(x => x.dataset.freq);
-}
-
-/* =========================
-   FREQUENCY BUTTONS
-========================= */
-
 function toggleFreq(btn){
-    btn.classList.toggle('active');
-    btn.classList.toggle('bg-emerald-600');
-    btn.classList.toggle('bg-slate-800');
+  const f=btn.dataset.freq;
+  if(state.freqs.includes(f)){ if(state.freqs.length===1)return; state.freqs=state.freqs.filter(x=>x!==f); }
+  else state.freqs.push(f);
+  btn.classList.toggle('active'); btn.classList.toggle('bg-emerald-600'); btn.classList.toggle('bg-slate-800');
+  if(!state.freqs.includes(state.selFreq)) state.selFreq=state.freqs[0];
+  updatePreview();
+}
+function sliderMove(){
+  state.amt=parseInt(document.getElementById('amtSlider').value);
+  document.getElementById('sliderLabel').textContent=fmt(state.amt);
+  updatePreview();
 }
 
-/* =========================
-   MAIN PREVIEW
-========================= */
+function readInputs(){
+  state.biz=document.getElementById('bizName').value||'Business Name';
+  state.max=num(document.getElementById('maxAmount').value)||100000;
+  state.factor=parseFloat(document.getElementById('factorRate').value)||1.18;
+  state.terms=document.getElementById('termOptions').value.split(',').map(x=>parseInt(x.trim())).filter(Boolean);
+  state.refiOn=document.getElementById('refiToggle').checked;
+  state.refiBalance=parseFloat(document.getElementById('refiBalance').value)||0;
+  state.refiRemaining=parseFloat(document.getElementById('refiRemaining').value)||0;
+  state.refiPayment=parseFloat(document.getElementById('refiPayment').value)||0;
+  state.earlyOn=document.getElementById('earlyToggle').checked;
+  // Sync slider max
+  const sl=document.getElementById('amtSlider');
+  sl.max=state.max;
+  if(state.amt>state.max)state.amt=state.max;
+  sl.value=state.amt;
+  document.getElementById('sliderLabel').textContent=fmt(state.amt);
+  document.getElementById('sliderMaxLabel').textContent=fmt(state.max);
+  if(!state.terms.includes(state.selTerm)) state.selTerm=state.terms[0]||12;
+}
 
 function updatePreview(){
+  readInputs();
+  document.getElementById('previewContainer').innerHTML=renderPortalHTML(state,true);
+}
 
-    const biz = document.getElementById('bizName').value || 'Business Name';
-    const max = num(document.getElementById('maxAmount').value) || 100000;
-    const factor = parseFloat(document.getElementById('factorRate').value) || 1.18;
-    const term = parseInt(document.getElementById('maxTerm').value) || 12;
+/* ─── Portal HTML renderer (shared by preview + full portal) */
+function renderPortalHTML(s,isPreview){
+  const {total,payment}=calcPmt(s.amt,s.selTerm,s.selFreq,s.factor);
+  const ep30=total-(total-s.amt)*0.50;
+  const ep60=total-(total-s.amt)*0.30;
+  const ep90=total-(total-s.amt)*0.10;
+  const refiCash=s.amt-s.refiBalance;
+  const refiSavings=(s.refiRemaining*s.refiPayment)-s.refiBalance;
 
-    const amount = Math.round(max * .75);
-    const total = Math.round(amount * factor);
-    const daily = Math.round(total / (term * 22));
+  const termBtns=s.terms.map(t=>`
+    <button onclick="portalSetTerm(${t})" id="termBtn${t}"
+      class="term-btn flex-1 py-2 rounded-xl text-xs font-semibold transition-all border
+      ${t===s.selTerm?'bg-[#0a1729] text-white border-[#0a1729]':'bg-white text-slate-600 border-slate-200 hover:border-[#0a1729]'}">
+      ${t}mo
+    </button>`).join('');
+  const freqBtns=s.freqs.map(f=>`
+    <button onclick="portalSetFreq('${f}')" id="freqBtn${f}"
+      class="freq-portal-btn flex-1 py-2 rounded-xl text-xs font-semibold transition-all border
+      ${f===s.selFreq?'bg-[#0a1729] text-white border-[#0a1729]':'bg-white text-slate-600 border-slate-200 hover:border-[#0a1729]'}">
+      ${f}
+    </button>`).join('');
 
-    const html = `
-    <div class="p-10 text-slate-900">
+  const sliderSection=`
+    <div class="px-2">
+      <div class="flex justify-between text-xs text-slate-400 mb-2">
+        <span>$5,000</span><span>${fmt(s.max)}</span>
+      </div>
+      <input type="range" min="5000" max="${s.max}" step="1000" value="${s.amt}"
+        oninput="portalSliderMove(this.value)"
+        class="w-full" style="accent-color:#0a1729;">
+    </div>`;
 
-        <div class="flex justify-between items-center mb-10">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-[#0a1729] text-white rounded-3xl flex items-center justify-center text-4xl font-bold logo-font">C</div>
-                <div class="text-3xl font-semibold logo-font">Clear Capital</div>
-            </div>
+  const refiSection=s.refiOn?`
+    <div class="bg-slate-50 rounded-2xl border border-slate-100 p-5">
+      <div class="text-xs font-bold text-slate-500 tracking-widest mb-3">REFI & PAYOFF SUMMARY</div>
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between"><span class="text-slate-500">Existing balance paid off</span><span class="font-semibold">${fmt(s.refiBalance)}</span></div>
+        <div class="flex justify-between"><span class="text-slate-500">Payments eliminated</span><span class="font-semibold">${s.refiRemaining} payments</span></div>
+        <div class="flex justify-between"><span class="text-slate-500">Cash to you after payoff</span><span class="font-semibold text-emerald-600">${refiCash>0?fmt(refiCash):'N/A'}</span></div>
+        <div class="flex justify-between"><span class="text-slate-500">Savings vs continuing</span><span class="font-semibold text-emerald-600">${refiSavings>0?fmt(refiSavings)+' saved':'Breakeven'}</span></div>
+      </div>
+    </div>`:'';
 
-            <div class="bg-emerald-100 text-emerald-700 px-5 py-2 rounded-3xl font-semibold">
-                PRE-APPROVED
-            </div>
+  const earlySection=s.earlyOn?`
+    <div class="bg-emerald-50 rounded-2xl border border-emerald-100 p-5">
+      <div class="text-xs font-bold text-emerald-700 tracking-widest mb-3">⚡ EARLY PAYOFF DISCOUNTS</div>
+      <div class="grid grid-cols-3 gap-3 text-center">
+        <div class="bg-white rounded-xl p-3 border border-emerald-100">
+          <div class="text-emerald-600 text-xs font-semibold mb-1">30 Days</div>
+          <div class="font-bold text-sm">${fmt(ep30)}</div>
+          <div class="text-emerald-500 text-xs">Save ${fmt(total-ep30)}</div>
         </div>
-
-        <div class="text-4xl font-semibold mb-8">${biz}</div>
-
-        <div>
-            <label class="block text-sm text-slate-500 mb-3">Funding Amount</label>
-
-            <div class="w-full px-8 py-8 text-5xl font-bold border border-slate-200 rounded-3xl text-center bg-slate-50">
-                ${money(amount)}
-            </div>
+        <div class="bg-white rounded-xl p-3 border border-emerald-100">
+          <div class="text-emerald-600 text-xs font-semibold mb-1">60 Days</div>
+          <div class="font-bold text-sm">${fmt(ep60)}</div>
+          <div class="text-emerald-500 text-xs">Save ${fmt(total-ep60)}</div>
         </div>
-
-        <div class="mt-10 grid grid-cols-3 gap-6 text-center">
-            <div>
-                <div class="text-3xl font-semibold">${money(daily)}</div>
-                <div class="text-xs text-slate-500">DAILY PAYMENT</div>
-            </div>
-
-            <div>
-                <div class="text-3xl font-semibold">${money(total)}</div>
-                <div class="text-xs text-slate-500">TOTAL PAYBACK</div>
-            </div>
-
-            <div>
-                <div class="text-3xl font-semibold">${factor.toFixed(2)}×</div>
-                <div class="text-xs text-slate-500">FACTOR RATE</div>
-            </div>
+        <div class="bg-white rounded-xl p-3 border border-emerald-100">
+          <div class="text-emerald-600 text-xs font-semibold mb-1">90 Days</div>
+          <div class="font-bold text-sm">${fmt(ep90)}</div>
+          <div class="text-emerald-500 text-xs">Save ${fmt(total-ep90)}</div>
         </div>
+      </div>
+    </div>`:'';
 
-        <div class="mt-12 bg-emerald-50 border border-emerald-100 rounded-3xl p-6">
-            <div class="font-semibold text-emerald-800 mb-4">Early Payoff</div>
-
-            <div class="grid grid-cols-3 gap-4 text-center text-sm">
-
-                <div class="bg-white rounded-2xl p-4">
-                    <div class="text-emerald-700 font-semibold">30 Days</div>
-                    <div class="font-bold">${money(total - ((total-amount)*0.5))}</div>
-                </div>
-
-                <div class="bg-white rounded-2xl p-4">
-                    <div class="text-emerald-700 font-semibold">60 Days</div>
-                    <div class="font-bold">${money(total - ((total-amount)*0.3))}</div>
-                </div>
-
-                <div class="bg-white rounded-2xl p-4">
-                    <div class="text-emerald-700 font-semibold">90 Days</div>
-                    <div class="font-bold">${money(total - ((total-amount)*0.1))}</div>
-                </div>
-
-            </div>
-        </div>
-
+  const ctaBtns=isPreview?'':`
+    <div class="flex gap-3">
+      <button onclick="openModal('uploadModal')"
+        class="flex-1 bg-[#0a1729] text-white py-4 rounded-2xl font-semibold text-sm hover:bg-slate-800 transition flex items-center justify-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Confirm Offer & Upload Docs
+      </button>
+      <button onclick="openModal('changesModal')"
+        class="bg-slate-100 text-slate-700 px-5 py-4 rounded-2xl font-semibold text-sm hover:bg-slate-200 transition flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        Request Changes
+      </button>
     </div>
-    `;
+    <p class="text-center text-xs text-slate-400">Pre-approval valid 30 days. Final terms subject to underwriting review.</p>`;
 
-    document.getElementById('previewContainer').innerHTML = html;
+  return `
+  <div class="p-7 space-y-5 text-slate-900">
+
+    <!-- Biz name + approved badge -->
+    <div>
+      <div class="text-2xl font-bold">${s.biz}</div>
+      <div class="text-slate-500 text-sm">${s.finType} Pre-Approval</div>
+    </div>
+
+    <!-- Big amount -->
+    <div class="bg-slate-50 rounded-2xl border border-slate-100 p-5 text-center">
+      <div class="text-xs text-slate-400 tracking-widest mb-1">FUNDING AMOUNT</div>
+      <div class="text-5xl font-bold text-[#0a1729]" id="portalAmt">${fmt(s.amt)}</div>
+      <div class="text-xs text-slate-400 mt-1">Up to ${fmt(s.max)} available</div>
+    </div>
+
+    <!-- Slider -->
+    ${sliderSection}
+
+    <!-- Term selector -->
+    <div>
+      <div class="text-xs text-slate-400 tracking-widest mb-2">SELECT TERM</div>
+      <div class="flex gap-2">${termBtns}</div>
+    </div>
+
+    <!-- Frequency selector -->
+    <div>
+      <div class="text-xs text-slate-400 tracking-widest mb-2">PAYMENT FREQUENCY</div>
+      <div class="flex gap-2">${freqBtns}</div>
+    </div>
+
+    <!-- Metrics -->
+    <div class="grid grid-cols-3 gap-3">
+      <div class="bg-slate-50 rounded-2xl p-4 text-center border border-slate-100">
+        <div class="text-xs text-slate-400 tracking-widest mb-1" id="pmtLabel">${s.selFreq.toUpperCase()} PMT</div>
+        <div class="font-bold text-lg text-[#0a1729]" id="pmtVal">${fmt(payment)}</div>
+      </div>
+      <div class="bg-slate-50 rounded-2xl p-4 text-center border border-slate-100">
+        <div class="text-xs text-slate-400 tracking-widest mb-1">TOTAL PAYBACK</div>
+        <div class="font-bold text-lg text-[#0a1729]" id="totalVal">${fmt(total)}</div>
+      </div>
+      <div class="bg-slate-50 rounded-2xl p-4 text-center border border-slate-100">
+        <div class="text-xs text-slate-400 tracking-widest mb-1">FACTOR RATE</div>
+        <div class="font-bold text-lg text-[#0a1729]">${s.factor.toFixed(2)}×</div>
+      </div>
+    </div>
+
+    ${refiSection}
+    ${earlySection}
+
+    ${ctaBtns}
+  </div>`;
 }
 
-/* =========================
-   LINK GENERATOR
-========================= */
+/* ─── Portal interactivity ───────────────────────────────── */
+function portalSliderMove(val){
+  state.amt=parseInt(val);
+  const{total,payment}=calcPmt(state.amt,state.selTerm,state.selFreq,state.factor);
+  const el=id=>document.getElementById(id);
+  if(el('portalAmt')) el('portalAmt').textContent=fmt(state.amt);
+  if(el('pmtVal'))    el('pmtVal').textContent=fmt(payment);
+  if(el('totalVal'))  el('totalVal').textContent=fmt(total);
+}
+function portalSetTerm(t){
+  state.selTerm=t;
+  refreshPortal();
+}
+function portalSetFreq(f){
+  state.selFreq=f;
+  refreshPortal();
+}
+function refreshPortal(){
+  const isPortal=!document.getElementById('portalView').classList.contains('hidden');
+  if(isPortal){
+    document.getElementById('portalContent').innerHTML=renderPortalHTML(state,false);
+  } else {
+    document.getElementById('previewContainer').innerHTML=renderPortalHTML(state,true);
+  }
+}
 
+/* ─── Link / portal ──────────────────────────────────────── */
+function getParams(){
+  return new URLSearchParams({
+    biz:state.biz, max:state.max, factor:state.factor,
+    terms:state.terms.join(','), freqs:state.freqs.join(','),
+    selTerm:state.selTerm, selFreq:state.selFreq,
+    refi:state.refiOn?1:0, rBal:state.refiBalance,
+    rRem:state.refiRemaining, rPmt:state.refiPayment,
+    early:state.earlyOn?1:0, portal:1
+  });
+}
 function generateLink(){
-
-    const params = new URLSearchParams({
-        biz: document.getElementById('bizName').value,
-        max: num(document.getElementById('maxAmount').value),
-        factor: document.getElementById('factorRate').value,
-        term: document.getElementById('maxTerm').value,
-        freq: getSelectedFrequencies().join(',')
-    });
-
-    const url = location.origin + location.pathname + '?' + params.toString();
-
-    navigator.clipboard.writeText(url).then(()=>{
-        alert('Merchant link copied:\\n\\n' + url);
-    });
+  const url=location.origin+location.pathname+'?'+getParams();
+  navigator.clipboard.writeText(url).then(()=>showToast('✓  Merchant link copied!'));
 }
-
-/* =========================
-   OPEN MERCHANT PORTAL
-========================= */
-
 function openPortal(){
-    const params = new URLSearchParams({
-        biz: document.getElementById('bizName').value,
-        max: num(document.getElementById('maxAmount').value),
-        factor: document.getElementById('factorRate').value,
-        term: document.getElementById('maxTerm').value,
-        freq: getSelectedFrequencies().join(',')
-    });
-
-    window.open(location.pathname + '?' + params.toString(), '_blank');
+  window.open(location.pathname+'?'+getParams(),'_blank');
 }
 
-/* =========================
-   AUTO LOAD QUERY PARAMS
-========================= */
+/* ─── PDF export ─────────────────────────────────────────── */
+function exportPDF(){
+  showToast('📄  See PDF in your downloads (server-generated)');
+  // In production wire this to your backend endpoint
+  // e.g. window.open('/api/generate-pdf?'+getParams())
+}
 
+/* ─── Draft email ────────────────────────────────────────── */
+function draftEmail(){
+  const{total,payment}=calcPmt(state.amt,state.selTerm,state.selFreq,state.factor);
+  const sub=encodeURIComponent(`Clear Capital Pre-Approval — ${state.biz}`);
+  const body=encodeURIComponent(
+`Hi,
+
+Congratulations! Your application has been pre-approved by Clear Capital Financing Solutions.
+
+Business: ${state.biz}
+Financing Type: ${state.finType}
+Approved Amount: ${fmt(state.amt)} (up to ${fmt(state.max)})
+Factor Rate: ${state.factor.toFixed(2)}x
+Term: ${state.selTerm} months
+${state.selFreq} Payment: ${fmt(payment)}
+Total Payback: ${fmt(total)}
+
+To confirm your offer and submit your Driver's License and Voided Check, please visit your approval portal.
+
+Questions? Reply to this email or call us directly.
+
+Best,
+Mark
+Clear Capital Financing Solutions
+mark@clearcapfund.com`);
+  window.open(`mailto:?subject=${sub}&body=${body}`);
+}
+
+/* ─── File upload UI ─────────────────────────────────────── */
+function fileChosen(labelId,input){
+  if(input.files[0]){
+    document.getElementById(labelId).textContent='✓  '+input.files[0].name;
+    document.getElementById(labelId).classList.add('text-emerald-400');
+  }
+}
+
+/* ─── Submission actions ─────────────────────────────────── */
+function submitConfirmation(){
+  const name=document.getElementById('merchantName').value||'(name not provided)';
+  const phone=document.getElementById('merchantPhone').value||'(phone not provided)';
+  const dl=document.getElementById('dlFile').files[0];
+  const chk=document.getElementById('checkFile').files[0];
+
+  if(!dl||!chk){
+    alert('Please upload both your Driver\'s License and Voided Check before confirming.');
+    return;
+  }
+
+  // In production: POST to your backend which emails mark@clearcapfund.com
+  // For now, open a mailto (attachments must be handled server-side)
+  const sub=encodeURIComponent(`Offer Confirmation — ${state.biz}`);
+  const body=encodeURIComponent(
+`New offer confirmation received!
+
+Business: ${state.biz}
+Contact: ${name}  |  ${phone}
+Amount: ${fmt(state.amt)}
+Term: ${state.selTerm} months (${state.selFreq})
+Factor: ${state.factor.toFixed(2)}x
+
+Documents uploaded:
+- Driver's License: ${dl.name}
+- Voided Check: ${chk.name}
+
+Please retrieve the attached documents from the secure upload portal.`);
+
+  window.open(`mailto:mark@clearcapfund.com?subject=${sub}&body=${body}`);
+  closeModal('uploadModal');
+  showToast('✓  Confirmation sent to Clear Capital!');
+}
+
+function toggleChangeTag(btn){
+  btn.classList.toggle('border-amber-400');
+  btn.classList.toggle('bg-amber-500/10');
+  btn.classList.toggle('text-amber-300');
+  const tag=btn.textContent.trim();
+  if(changeTags.has(tag)) changeTags.delete(tag); else changeTags.add(tag);
+}
+
+function submitChanges(){
+  const notes=document.getElementById('changeNotes').value||'(no notes)';
+  const name=document.getElementById('changeName').value||'(no name)';
+  const phone=document.getElementById('changePhone').value||'(no phone)';
+  const tags=[...changeTags].join(', ')||'(not specified)';
+
+  const sub=encodeURIComponent(`Change Request — ${state.biz}`);
+  const body=encodeURIComponent(
+`Change request received!
+
+Business: ${state.biz}
+Contact: ${name}  |  ${phone}
+
+What they want changed: ${tags}
+
+Notes:
+${notes}`);
+
+  window.open(`mailto:mark@clearcapfund.com?subject=${sub}&body=${body}`);
+  closeModal('changesModal');
+  showToast('✓  Change request sent!');
+}
+
+/* ─── Load from URL params ───────────────────────────────── */
 function loadFromURL(){
+  const q=new URLSearchParams(location.search);
 
-    const q = new URLSearchParams(location.search);
+  if(q.get('portal')){
+    // Show merchant portal
+    document.getElementById('builderView').classList.add('hidden');
+    document.getElementById('portalView').classList.remove('hidden');
 
-    if(q.get('biz')) document.getElementById('bizName').value = q.get('biz');
-    if(q.get('max')) document.getElementById('maxAmount').value =
-        parseInt(q.get('max')).toLocaleString('en-US');
-    if(q.get('factor')) document.getElementById('factorRate').value = q.get('factor');
-    if(q.get('term')) document.getElementById('maxTerm').value = q.get('term');
+    if(q.get('biz'))   state.biz=q.get('biz');
+    if(q.get('max'))   state.max=parseFloat(q.get('max'));
+    if(q.get('factor'))state.factor=parseFloat(q.get('factor'));
+    if(q.get('terms')) state.terms=q.get('terms').split(',').map(Number);
+    if(q.get('freqs')) state.freqs=q.get('freqs').split(',');
+    if(q.get('selTerm'))state.selTerm=parseInt(q.get('selTerm'));
+    if(q.get('selFreq'))state.selFreq=q.get('selFreq');
+    if(q.get('refi'))  state.refiOn=q.get('refi')==='1';
+    if(q.get('rBal'))  state.refiBalance=parseFloat(q.get('rBal'));
+    if(q.get('rRem'))  state.refiRemaining=parseFloat(q.get('rRem'));
+    if(q.get('rPmt'))  state.refiPayment=parseFloat(q.get('rPmt'));
+    if(q.get('early')) state.earlyOn=q.get('early')==='1';
+    state.amt=Math.round(state.max*0.75);
 
-    if(q.get('freq')){
-        const list = q.get('freq').split(',');
-        document.querySelectorAll('.freq-btn').forEach(btn=>{
-            const on = list.includes(btn.dataset.freq);
+    document.getElementById('portalContent').innerHTML=renderPortalHTML(state,false);
 
-            btn.classList.toggle('active', on);
-            btn.classList.toggle('bg-emerald-600', on);
-            btn.classList.toggle('bg-slate-800', !on);
-        });
-    }
-
+  } else {
     updatePreview();
+  }
 }
 
-/* START */
+/* ─── Boot ───────────────────────────────────────────────── */
 loadFromURL();
 </script>
 
