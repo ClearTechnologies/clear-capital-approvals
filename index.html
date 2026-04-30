@@ -5,211 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clear Capital • Approved</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root { --navy: #0a1729; --emerald: #00d4aa; }
         body { font-family: 'Inter', system-ui, sans-serif; }
         .logo-font { font-family: 'Space Grotesk', sans-serif; }
-        .header { background: var(--navy); }
-        .merchant-card { box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.15); }
     </style>
 </head>
 <body class="bg-slate-50">
 
-<!-- BUILDER (You) -->
-<div id="builder-mode">
-    <div class="header text-white px-8 py-6 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <div class="w-11 h-11 bg-white text-[#00d4aa] rounded-3xl flex items-center justify-center text-4xl font-bold logo-font">C</div>
-            <div class="text-3xl font-semibold tracking-[-1px] logo-font">Clear Capital</div>
-        </div>
-        <div class="text-emerald-300 font-medium">Deal Studio • Internal</div>
-    </div>
-
-    <div class="max-w-screen-2xl mx-auto p-8">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <!-- Builder Panel -->
-            <div class="lg:col-span-4 bg-white rounded-3xl p-8 space-y-8">
-                <h1 class="text-3xl font-semibold logo-font">Deal Builder</h1>
-                <div class="space-y-6">
-                    <div>
-                        <label class="text-xs font-medium text-slate-500 block mb-1">Business Name</label>
-                        <input id="bizName" value="Sunrise Grill & Bar" oninput="update()" class="w-full px-5 py-4 border border-slate-200 rounded-2xl focus:border-emerald-500 outline-none text-lg">
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="text-xs font-medium text-slate-500 block mb-1">Max Approval Amount</label>
-                            <input id="maxAmt" type="number" value="100000" oninput="update()" class="w-full px-5 py-4 border border-slate-200 rounded-2xl text-lg">
-                        </div>
-                        <div>
-                            <label class="text-xs font-medium text-slate-500 block mb-1">Factor Rate</label>
-                            <input id="factorRate" type="number" value="1.18" step="0.01" oninput="update()" class="w-full px-5 py-4 border border-slate-200 rounded-2xl text-lg">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-xs font-medium text-slate-500 block mb-1">Term (months)</label>
-                        <input id="term" type="number" value="12" oninput="update()" class="w-full px-5 py-4 border border-slate-200 rounded-2xl text-lg">
-                    </div>
-
-                    <div>
-                        <label class="text-xs font-medium text-slate-500 block mb-2">Allowed Payment Frequencies</label>
-                        <div class="flex gap-2 flex-wrap">
-                            <button onclick="toggleFreq(this)" data-freq="Daily" class="freq-chip px-5 py-2 bg-emerald-100 text-emerald-700 rounded-3xl font-medium">Daily</button>
-                            <button onclick="toggleFreq(this)" data-freq="Weekly" class="freq-chip px-5 py-2 bg-slate-100 text-slate-700 rounded-3xl font-medium">Weekly</button>
-                            <button onclick="toggleFreq(this)" data-freq="Monthly" class="freq-chip px-5 py-2 bg-slate-100 text-slate-700 rounded-3xl font-medium">Monthly</button>
-                        </div>
-                    </div>
-
-                    <button onclick="generatePrivateLink()" class="w-full py-6 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xl rounded-3xl">
-                        Generate Private Merchant Link
-                    </button>
-                </div>
-            </div>
-
-            <!-- Live Preview -->
-            <div class="lg:col-span-8">
-                <div id="view-merchant" class="merchant-card bg-white rounded-3xl p-8 lg:p-12">
-                    <div id="merchant-content"></div>
-                </div>
+<div class="min-h-screen bg-slate-50">
+    <div class="max-w-7xl mx-auto p-8">
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-3xl shadow">
+                <div class="w-10 h-10 bg-emerald-600 text-white rounded-2xl flex items-center justify-center text-3xl font-bold logo-font">C</div>
+                <div class="text-3xl font-semibold logo-font">Clear Capital</div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- MERCHANT VIEW -->
-<div id="merchant-only-view" class="hidden min-h-screen bg-gradient-to-br from-slate-50 to-white flex items-center justify-center p-6">
-    <div class="max-w-2xl w-full">
-        <div id="merchant-card" class="merchant-card bg-white rounded-3xl p-8 lg:p-12"></div>
+        <div class="max-w-2xl mx-auto bg-white rounded-3xl shadow-xl p-10">
+            <h1 class="text-4xl font-semibold text-center mb-8 logo-font">Deal Builder</h1>
+            
+            <div class="space-y-8">
+                <input id="bizName" value="Sunrise Grill & Bar" oninput="update()" placeholder="Business Name" 
+                       class="w-full px-6 py-5 text-xl border border-slate-200 rounded-2xl focus:border-emerald-500">
+
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-sm text-slate-500">Max Approval</label>
+                        <input id="maxAmt" type="number" value="100000" oninput="update()" class="w-full px-6 py-5 text-xl border border-slate-200 rounded-2xl">
+                    </div>
+                    <div>
+                        <label class="text-sm text-slate-500">Factor Rate</label>
+                        <input id="factorRate" type="number" value="1.18" step="0.01" oninput="update()" class="w-full px-6 py-5 text-xl border border-slate-200 rounded-2xl">
+                    </div>
+                </div>
+
+                <button onclick="generatePrivateLink()" 
+                        class="w-full py-6 bg-emerald-600 hover:bg-emerald-700 text-white text-xl font-semibold rounded-3xl">
+                    Generate Private Merchant Link
+                </button>
+            </div>
+
+            <div id="preview" class="mt-12 bg-slate-50 rounded-3xl p-8 text-center"></div>
+        </div>
     </div>
 </div>
 
 <script>
-let state = { amt: 75000, term: 12, freq: "Daily", allowedFreqs: ["Daily","Weekly","Monthly"] };
+function update() {
+    const biz = document.getElementById('bizName').value || "Business";
+    const max = parseInt(document.getElementById('maxAmt').value) || 100000;
+    const factor = parseFloat(document.getElementById('factorRate').value) || 1.18;
+    const amt = Math.round(max * 0.75);
 
-function isMerchantMode() {
-    return new URLSearchParams(window.location.search).has('merchant');
-}
-
-function toggleFreq(el) {
-    const freq = el.dataset.freq;
-    if (state.allowedFreqs.includes(freq)) {
-        state.allowedFreqs = state.allowedFreqs.filter(f => f !== freq);
-        el.classList.remove('bg-emerald-100', 'text-emerald-700');
-        el.classList.add('bg-slate-100', 'text-slate-700');
-    } else {
-        state.allowedFreqs.push(freq);
-        el.classList.add('bg-emerald-100', 'text-emerald-700');
-    }
-    update();
-}
-
-function calcPayments(amt, term, freq, factor) {
-    const total = Math.round(amt * factor);
-    let periods = term * 22;
-    if (freq === 'Weekly') periods = Math.round(term * 4.333);
-    if (freq === 'Monthly') periods = term;
-    return { total, payment: Math.round(total / periods) };
+    document.getElementById('preview').innerHTML = `
+        <div class="text-6xl font-bold text-slate-900 mb-2">$${amt.toLocaleString()}</div>
+        <div class="text-slate-500">75% of Max Approval</div>
+        <div class="mt-8 text-sm text-emerald-600 font-medium">Factor Rate: ${factor.toFixed(2)}×</div>
+    `;
 }
 
 function generatePrivateLink() {
     const params = new URLSearchParams({
         merchant: 'true',
-        biz: document.getElementById('bizName').value || 'Business',
+        biz: document.getElementById('bizName').value,
         max: document.getElementById('maxAmt').value,
-        factor: document.getElementById('factorRate').value,
-        term: document.getElementById('term').value,
-        freqs: state.allowedFreqs.join(',')
+        factor: document.getElementById('factorRate').value
     });
-    const link = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
-    navigator.clipboard.writeText(link).then(() => alert('✅ Link Copied! Send to merchant.'));
+    const link = window.location.origin + window.location.pathname + '?' + params.toString();
+    navigator.clipboard.writeText(link);
+    alert('✅ Merchant Link Copied!\n\n' + link);
 }
 
-function update() {
-    if (isMerchantMode()) return;
-    const maxAmt = parseInt(document.getElementById('maxAmt').value) || 100000;
-    state.amt = Math.round(maxAmt * 0.75);
-    const factor = parseFloat(document.getElementById('factorRate').value) || 1.18;
-    const term = parseInt(document.getElementById('term').value) || 12;
-    const calc = calcPayments(state.amt, term, state.freq, factor);
-
-    document.getElementById('merchant-content').innerHTML = `
-        <div class="flex justify-between items-start mb-8">
-            <div>
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-emerald-600 text-white rounded-3xl flex items-center justify-center text-3xl font-bold logo-font">C</div>
-                    <div class="text-3xl font-semibold logo-font">Clear Capital</div>
-                </div>
-                <div class="text-4xl font-semibold mt-8">${document.getElementById('bizName').value || 'Your Business'}</div>
-            </div>
-            <div class="bg-emerald-100 text-emerald-700 px-6 py-2 rounded-3xl text-sm font-semibold">PRE-APPROVED</div>
-        </div>
-        <div class="text-7xl font-bold logo-font text-slate-900 mb-1">$${state.amt.toLocaleString()}</div>
-        <div class="text-slate-500 mb-8">Selected Funding Amount (75% of max)</div>
-        <input type="range" min="5000" max="${maxAmt}" value="${state.amt}" step="1000" oninput="state.amt=parseInt(this.value);update()" class="w-full accent-emerald-500">
-        <div class="grid grid-cols-3 gap-6 mt-12">
-            <div class="text-center"><div class="text-4xl font-semibold">$${calc.payment}</div><div class="text-xs text-slate-500">${state.freq} PAYMENT</div></div>
-            <div class="text-center"><div class="text-4xl font-semibold">$${calc.total}</div><div class="text-xs text-slate-500">TOTAL PAYBACK</div></div>
-            <div class="text-center"><div class="text-4xl font-semibold">${factor.toFixed(2)}×</div><div class="text-xs text-slate-500">FACTOR RATE</div></div>
-        </div>
-    `;
-}
-
-function renderMerchantView() {
-    const params = new URLSearchParams(window.location.search);
-    const biz = params.get('biz') || 'Your Business';
-    const max = parseInt(params.get('max')) || 100000;
-    const factor = parseFloat(params.get('factor')) || 1.18;
-    const term = parseInt(params.get('term')) || 12;
-    const amt = Math.round(max * 0.75);
-    const calc = calcPayments(amt, term, 'Daily', factor);
-
-    document.getElementById('merchant-card').innerHTML = `
-        <div class="flex justify-between items-start">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-emerald-600 text-white rounded-3xl flex items-center justify-center text-3xl font-bold logo-font">C</div>
-                <div class="text-3xl font-semibold logo-font">Clear Capital</div>
-            </div>
-            <div class="px-6 py-2 bg-emerald-100 text-emerald-700 rounded-3xl font-semibold text-sm">PRE-APPROVED</div>
-        </div>
-        <div class="text-6xl font-bold logo-font text-slate-900 mt-10">$${amt.toLocaleString()}</div>
-        <div class="text-slate-500">Approved Funding</div>
-        <div class="mt-10"><input type="range" min="5000" max="${max}" value="${amt}" step="1000" class="w-full accent-emerald-500"></div>
-        <div class="mt-12 grid grid-cols-3 gap-6">
-            <div class="text-center"><div class="text-4xl font-semibold">$${calc.payment}</div><div class="text-xs text-slate-500">DAILY PAYMENT</div></div>
-            <div class="text-center"><div class="text-4xl font-semibold">$${calc.total}</div><div class="text-xs text-slate-500">TOTAL PAYBACK</div></div>
-            <div class="text-center"><div class="text-4xl font-semibold">${factor.toFixed(2)}×</div><div class="text-xs text-slate-500">FACTOR RATE</div></div>
-        </div>
-        <div class="mt-12 flex gap-4">
-            <button onclick="sendInterestEmail()" class="flex-1 py-7 bg-emerald-600 text-white font-semibold text-2xl rounded-3xl">I'm Interested →</button>
-            <button onclick="sendChangeRequest()" class="flex-1 py-7 border-2 border-slate-300 font-semibold text-2xl rounded-3xl">Request Change</button>
-        </div>
-    `;
-}
-
-function sendInterestEmail() {
-    const params = new URLSearchParams(window.location.search);
-    const subject = `Clear Capital Approval - ${params.get('biz') || 'Business'}`;
-    const body = `Hi,\n\nI'm interested in the approval for $${params.get('max')}.\nPlease send the final documents.`;
-    window.location.href = `mailto:underwriting@clearcapital.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-}
-
-function sendChangeRequest() {
-    const params = new URLSearchParams(window.location.search);
-    const subject = `Change Request - ${params.get('biz') || 'Business'}`;
-    const body = `Hi,\n\nI received the approval but would like to request a change:\n\n[Describe here]`;
-    window.location.href = `mailto:underwriting@clearcapital.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-}
-
-window.onload = () => {
-    if (isMerchantMode()) {
-        document.getElementById('builder-mode').classList.add('hidden');
-        document.getElementById('merchant-only-view').classList.remove('hidden');
-        renderMerchantView();
-    } else {
-        update();
-    }
-};
+update();
 </script>
 </body>
 </html>
