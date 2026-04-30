@@ -1,174 +1,347 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clear Capital • Approved</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root { --navy: #0a1729; --emerald: #00d4aa; }
-        body { font-family: 'Inter', system-ui, sans-serif; }
-        .logo-font { font-family: 'Space Grotesk', sans-serif; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Clear Capital • Builder + Merchant Portal</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --navy:#0a1729;
+    --emerald:#00d4aa;
+}
+body{
+    font-family:Inter,system-ui,sans-serif;
+}
+.logo-font{
+    font-family:'Space Grotesk',sans-serif;
+}
+.preview-frame{
+    box-shadow:0 25px 50px -12px rgb(0 0 0 / .25);
+}
+</style>
 </head>
-<body class="bg-slate-50 min-h-screen flex items-center justify-center p-6">
-    <div class="max-w-2xl w-full bg-white rounded-3xl shadow-2xl p-10">
+
+<body class="bg-slate-950 text-white min-h-screen">
+
+<div class="flex h-screen">
+
+    <!-- ========================= -->
+    <!-- BUILDER PANEL -->
+    <!-- ========================= -->
+    <div class="w-5/12 bg-slate-900 border-r border-slate-800 overflow-auto">
+        <div class="p-8">
+
+            <!-- LOGO -->
+            <div class="flex items-center gap-3 mb-10">
+                <div class="w-10 h-10 bg-white text-[#0a1729] rounded-2xl flex items-center justify-center text-3xl font-bold logo-font">C</div>
+                <div>
+                    <div class="text-2xl font-semibold logo-font">Clear Capital</div>
+                    <div class="text-xs text-emerald-400">Offer Builder</div>
+                </div>
+            </div>
+
+            <h1 class="text-3xl font-semibold mb-8">Create Merchant Offer</h1>
+
+            <div class="space-y-8">
+
+                <!-- Business Name -->
+                <div>
+                    <label class="block text-sm text-slate-400 mb-2">Business Name</label>
+                    <input
+                        id="bizName"
+                        type="text"
+                        value="Sunrise Grill & Bar"
+                        oninput="updatePreview()"
+                        class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <!-- Max Amount -->
+                <div>
+                    <label class="block text-sm text-slate-400 mb-2">Maximum Approval Amount</label>
+                    <input
+                        id="maxAmount"
+                        type="text"
+                        value="100,000"
+                        oninput="formatAsYouType(this); updatePreview()"
+                        class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-6 py-4 text-2xl font-semibold focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <!-- Factor -->
+                <div>
+                    <label class="block text-sm text-slate-400 mb-2">Factor Rate</label>
+                    <input
+                        id="factorRate"
+                        type="number"
+                        step="0.01"
+                        value="1.18"
+                        oninput="updatePreview()"
+                        class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <!-- Term -->
+                <div>
+                    <label class="block text-sm text-slate-400 mb-2">Maximum Term (Months)</label>
+                    <input
+                        id="maxTerm"
+                        type="number"
+                        value="12"
+                        oninput="updatePreview()"
+                        class="w-full bg-slate-800 border border-slate-700 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <!-- Frequencies -->
+                <div>
+                    <label class="block text-sm text-slate-400 mb-3">Allowed Frequencies</label>
+
+                    <div class="grid grid-cols-3 gap-3">
+                        <button onclick="toggleFreq(this)" data-freq="daily"
+                            class="freq-btn active bg-emerald-600 py-4 rounded-2xl font-medium">
+                            Daily
+                        </button>
+
+                        <button onclick="toggleFreq(this)" data-freq="weekly"
+                            class="freq-btn bg-slate-800 py-4 rounded-2xl font-medium">
+                            Weekly
+                        </button>
+
+                        <button onclick="toggleFreq(this)" data-freq="monthly"
+                            class="freq-btn bg-slate-800 py-4 rounded-2xl font-medium">
+                            Monthly
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="mt-12 space-y-4">
+
+                <button onclick="generateLink()"
+                    class="w-full bg-emerald-500 hover:bg-emerald-600 transition text-black font-semibold text-xl py-6 rounded-3xl">
+                    Generate Merchant Link
+                </button>
+
+                <button onclick="openPortal()"
+                    class="w-full bg-white text-slate-900 font-semibold text-xl py-6 rounded-3xl">
+                    Open Merchant Portal
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ========================= -->
+    <!-- LIVE PREVIEW -->
+    <!-- ========================= -->
+    <div class="flex-1 bg-slate-50 p-8 overflow-auto flex items-center justify-center">
+        <div class="w-full max-w-[440px]">
+            <div class="text-center text-slate-400 text-sm mb-4">
+                LIVE PREVIEW
+            </div>
+
+            <div id="previewContainer" class="preview-frame bg-white rounded-3xl overflow-hidden"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+/* =========================
+   HELPERS
+========================= */
+
+function num(v){
+    return parseFloat(String(v).replace(/,/g,'')) || 0;
+}
+
+function money(n){
+    return '$' + Math.round(n).toLocaleString('en-US');
+}
+
+function formatAsYouType(input){
+    let raw = input.value.replace(/[^0-9]/g,'');
+    if(raw){
+        input.value = parseInt(raw).toLocaleString('en-US');
+    }else{
+        input.value = '';
+    }
+}
+
+function getSelectedFrequencies(){
+    return [...document.querySelectorAll('.freq-btn.active')]
+        .map(x => x.dataset.freq);
+}
+
+/* =========================
+   FREQUENCY BUTTONS
+========================= */
+
+function toggleFreq(btn){
+    btn.classList.toggle('active');
+    btn.classList.toggle('bg-emerald-600');
+    btn.classList.toggle('bg-slate-800');
+}
+
+/* =========================
+   MAIN PREVIEW
+========================= */
+
+function updatePreview(){
+
+    const biz = document.getElementById('bizName').value || 'Business Name';
+    const max = num(document.getElementById('maxAmount').value) || 100000;
+    const factor = parseFloat(document.getElementById('factorRate').value) || 1.18;
+    const term = parseInt(document.getElementById('maxTerm').value) || 12;
+
+    const amount = Math.round(max * .75);
+    const total = Math.round(amount * factor);
+    const daily = Math.round(total / (term * 22));
+
+    const html = `
+    <div class="p-10 text-slate-900">
+
         <div class="flex justify-between items-center mb-10">
             <div class="flex items-center gap-3">
                 <div class="w-12 h-12 bg-[#0a1729] text-white rounded-3xl flex items-center justify-center text-4xl font-bold logo-font">C</div>
                 <div class="text-3xl font-semibold logo-font">Clear Capital</div>
             </div>
-            <div class="bg-emerald-100 text-emerald-700 px-6 py-2 rounded-3xl font-semibold">PRE-APPROVED</div>
+
+            <div class="bg-emerald-100 text-emerald-700 px-5 py-2 rounded-3xl font-semibold">
+                PRE-APPROVED
+            </div>
         </div>
 
-        <div id="bizNameDisplay" class="text-4xl font-semibold text-[#0a1729]"></div>
+        <div class="text-4xl font-semibold mb-8">${biz}</div>
 
-        <!-- Funding Amount -->
-        <div class="mt-10">
+        <div>
             <label class="block text-sm text-slate-500 mb-3">Funding Amount</label>
-            <input id="amtInput" type="text" 
-                   oninput="formatAsYouType(this); updateCalc()" 
-                   onblur="formatAmount(this)"
-                   class="w-full px-8 py-8 text-6xl font-bold border border-slate-200 rounded-3xl text-center">
-            <input type="range" id="amtSlider" min="5000" step="1000"
-                   oninput="document.getElementById('amtInput').value = Number(this.value).toLocaleString('en-US'); updateCalc()"
-                   class="w-full mt-6 accent-[#0a1729]">
+
+            <div class="w-full px-8 py-8 text-5xl font-bold border border-slate-200 rounded-3xl text-center bg-slate-50">
+                ${money(amount)}
+            </div>
         </div>
 
-        <!-- Payment Frequency -->
-        <div class="mt-8">
-            <label class="block text-sm text-slate-500 mb-3">Payment Frequency</label>
-            <div id="frequencyButtons" class="flex flex-wrap gap-3"></div>
+        <div class="mt-10 grid grid-cols-3 gap-6 text-center">
+            <div>
+                <div class="text-3xl font-semibold">${money(daily)}</div>
+                <div class="text-xs text-slate-500">DAILY PAYMENT</div>
+            </div>
+
+            <div>
+                <div class="text-3xl font-semibold">${money(total)}</div>
+                <div class="text-xs text-slate-500">TOTAL PAYBACK</div>
+            </div>
+
+            <div>
+                <div class="text-3xl font-semibold">${factor.toFixed(2)}×</div>
+                <div class="text-xs text-slate-500">FACTOR RATE</div>
+            </div>
         </div>
 
-        <!-- Main Calculations -->
-        <div class="mt-12 grid grid-cols-3 gap-8 text-center" id="mainCalc"></div>
+        <div class="mt-12 bg-emerald-50 border border-emerald-100 rounded-3xl p-6">
+            <div class="font-semibold text-emerald-800 mb-4">Early Payoff</div>
 
-        <!-- Early Payoff -->
-        <div class="mt-12 bg-emerald-50 border border-emerald-100 rounded-3xl p-8">
-            <div class="font-semibold text-emerald-800 mb-6">Early Payoff Options</div>
-            <div class="grid grid-cols-3 gap-6 text-center" id="earlyPayoff"></div>
+            <div class="grid grid-cols-3 gap-4 text-center text-sm">
+
+                <div class="bg-white rounded-2xl p-4">
+                    <div class="text-emerald-700 font-semibold">30 Days</div>
+                    <div class="font-bold">${money(total - ((total-amount)*0.5))}</div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-4">
+                    <div class="text-emerald-700 font-semibold">60 Days</div>
+                    <div class="font-bold">${money(total - ((total-amount)*0.3))}</div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-4">
+                    <div class="text-emerald-700 font-semibold">90 Days</div>
+                    <div class="font-bold">${money(total - ((total-amount)*0.1))}</div>
+                </div>
+
+            </div>
         </div>
 
-        <div class="mt-16 flex gap-4">
-            <button onclick="sendInterest()" class="flex-1 py-8 bg-[#0a1729] text-white font-semibold text-2xl rounded-3xl">I'm Interested →</button>
-            <button onclick="sendChangeRequest()" class="flex-1 py-8 border-2 border-slate-300 font-semibold text-2xl rounded-3xl">Request Change</button>
-        </div>
     </div>
+    `;
 
-    <script>
-        // Helper: Format with commas + $
-        function fmt(n) {
-            return '$' + Math.round(n).toLocaleString('en-US');
-        }
+    document.getElementById('previewContainer').innerHTML = html;
+}
 
-        function formatAsYouType(input) {
-            let val = input.value.replace(/[^0-9]/g, '');
-            if (val) input.value = parseInt(val).toLocaleString('en-US');
-        }
+/* =========================
+   LINK GENERATOR
+========================= */
 
-        function formatAmount(input) {
-            let val = parseInt(input.value.replace(/,/g, '')) || 5000;
-            input.value = val.toLocaleString('en-US');
-            updateCalc();
-        }
+function generateLink(){
 
-        // Read URL parameters
-        const params = new URLSearchParams(window.location.search);
-        const bizName = decodeURIComponent(params.get('biz') || 'Your Business');
-        let maxAmount = parseInt(params.get('max')) || 100000;
-        const factor = parseFloat(params.get('factor')) || 1.18;
-        const maxTerm = parseInt(params.get('term')) || 12;
-        const allowedFreqs = params.get('freq') ? params.get('freq').split(',') : ['daily'];
+    const params = new URLSearchParams({
+        biz: document.getElementById('bizName').value,
+        max: num(document.getElementById('maxAmount').value),
+        factor: document.getElementById('factorRate').value,
+        term: document.getElementById('maxTerm').value,
+        freq: getSelectedFrequencies().join(',')
+    });
 
-        // Determine available frequencies for merchant
-        function getAvailableFrequencies() {
-            let options = new Set(['daily']);
-            if (allowedFreqs.includes('weekly') || allowedFreqs.includes('biweekly') || allowedFreqs.includes('monthly')) {
-                options.add('weekly');
-            }
-            if (allowedFreqs.includes('biweekly') || allowedFreqs.includes('monthly')) {
-                options.add('biweekly');
-            }
-            if (allowedFreqs.includes('monthly')) {
-                options.add('monthly');
-            }
-            return Array.from(options);
-        }
+    const url = location.origin + location.pathname + '?' + params.toString();
 
-        function updateCalc() {
-            let amtStr = document.getElementById('amtInput').value.replace(/,/g, '');
-            let amt = parseInt(amtStr) || 5000;
-            amt = Math.min(Math.max(amt, 5000), maxAmount);
+    navigator.clipboard.writeText(url).then(()=>{
+        alert('Merchant link copied:\\n\\n' + url);
+    });
+}
 
-            const total = Math.round(amt * factor);
-            const daily = Math.round(total / (maxTerm * 22));   // business days
+/* =========================
+   OPEN MERCHANT PORTAL
+========================= */
 
-            document.getElementById('mainCalc').innerHTML = `
-                <div><div class="text-5xl font-semibold">${fmt(daily)}</div><div class="text-xs text-slate-500">PAYMENT</div></div>
-                <div><div class="text-5xl font-semibold">${fmt(total)}</div><div class="text-xs text-slate-500">TOTAL PAYBACK</div></div>
-                <div><div class="text-5xl font-semibold">${factor.toFixed(2)}×</div><div class="text-xs text-slate-500">FACTOR RATE</div></div>
-            `;
+function openPortal(){
+    const params = new URLSearchParams({
+        biz: document.getElementById('bizName').value,
+        max: num(document.getElementById('maxAmount').value),
+        factor: document.getElementById('factorRate').value,
+        term: document.getElementById('maxTerm').value,
+        freq: getSelectedFrequencies().join(',')
+    });
 
-            // Early payoff (simple example - you can enhance later)
-            const remaining = total - amt;
-            document.getElementById('earlyPayoff').innerHTML = `
-                <div class="bg-white rounded-2xl p-5"><div class="text-emerald-600 font-semibold">30 Days</div><div class="text-3xl font-bold text-emerald-700">${fmt(total - Math.round(remaining * 0.5))}</div><div class="text-xs text-slate-500">Lower Factor</div></div>
-                <div class="bg-white rounded-2xl p-5"><div class="text-emerald-600 font-semibold">60 Days</div><div class="text-3xl font-bold text-emerald-700">${fmt(total - Math.round(remaining * 0.3))}</div><div class="text-xs text-slate-500">Lower Factor</div></div>
-                <div class="bg-white rounded-2xl p-5"><div class="text-emerald-600 font-semibold">90 Days</div><div class="text-3xl font-bold text-emerald-700">${fmt(total - Math.round(remaining * 0.1))}</div><div class="text-xs text-slate-500">Lower Factor</div></div>
-            `;
-        }
+    window.open(location.pathname + '?' + params.toString(), '_blank');
+}
 
-        function renderFrequencyButtons() {
-            const container = document.getElementById('frequencyButtons');
-            const frequencies = getAvailableFrequencies();
-            const labels = { daily: "Daily", weekly: "Weekly", biweekly: "Bi-weekly", monthly: "Monthly" };
+/* =========================
+   AUTO LOAD QUERY PARAMS
+========================= */
 
-            container.innerHTML = frequencies.map(freq => `
-                <button onclick="selectFrequency(this)" data-freq="${freq}"
-                        class="freq-btn px-6 py-3 bg-white border-2 border-slate-200 rounded-2xl font-medium hover:border-emerald-500 transition-colors">
-                    ${labels[freq]}
-                </button>
-            `).join('');
+function loadFromURL(){
 
-            // Select first one by default
-            if (container.children.length > 0) {
-                container.children[0].classList.add('!border-emerald-500', 'bg-emerald-50');
-            }
-        }
+    const q = new URLSearchParams(location.search);
 
-        function selectFrequency(btn) {
-            document.querySelectorAll('.freq-btn').forEach(b => {
-                b.classList.remove('!border-emerald-500', 'bg-emerald-50');
-            });
-            btn.classList.add('!border-emerald-500', 'bg-emerald-50');
-            updateCalc();
-        }
+    if(q.get('biz')) document.getElementById('bizName').value = q.get('biz');
+    if(q.get('max')) document.getElementById('maxAmount').value =
+        parseInt(q.get('max')).toLocaleString('en-US');
+    if(q.get('factor')) document.getElementById('factorRate').value = q.get('factor');
+    if(q.get('term')) document.getElementById('maxTerm').value = q.get('term');
 
-        function sendInterest() {
-            alert("Thank you! A Clear Capital specialist will contact you shortly.");
-        }
-        function sendChangeRequest() {
-            alert("Change request received. We'll get back to you soon.");
-        }
+    if(q.get('freq')){
+        const list = q.get('freq').split(',');
+        document.querySelectorAll('.freq-btn').forEach(btn=>{
+            const on = list.includes(btn.dataset.freq);
 
-        // Initialize
-        window.onload = () => {
-            document.getElementById('bizNameDisplay').textContent = bizName;
+            btn.classList.toggle('active', on);
+            btn.classList.toggle('bg-emerald-600', on);
+            btn.classList.toggle('bg-slate-800', !on);
+        });
+    }
 
-            // Set slider max
-            const slider = document.getElementById('amtSlider');
-            slider.max = maxAmount;
+    updatePreview();
+}
 
-            // Initial amount = 75% of max
-            const initialAmount = Math.round(maxAmount * 0.75);
-            document.getElementById('amtInput').value = initialAmount.toLocaleString('en-US');
-            slider.value = initialAmount;
+/* START */
+loadFromURL();
+</script>
 
-            renderFrequencyButtons();
-            updateCalc();
-        };
-    </script>
 </body>
 </html>
+```
